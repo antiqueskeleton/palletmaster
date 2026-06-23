@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PalletMaster</title>
+<style>
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root {
+  --bg:       #0b0c10;
+  --surf0:    #13141a;
+  --surf1:    #1a1b24;
+  --surf2:    #21222e;
+  --bdr:      #2a2c3a;
+  --bdr2:     #383b50;
+  --gold:     #f0c040;
+  --golddim:  #c09820;
+  --text:     #dde1ee;
+  --muted:    #7a7f9a;
+  --green:    #3ecf74;
+  --amber:    #f0922a;
+  --red:      #e04848;
+  --blue:     #4a90d9;
+  --r:        5px;
+  --mono:     'Courier New', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── LAYOUT ─────────────────────────────────────────────── */
+.app-shell {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+}
+
+/* ── HEADER ─────────────────────────────────────────────── */
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0 14px;
+  border-bottom: 1px solid var(--bdr);
+  margin-bottom: 18px;
+}
+.app-header img { height: 32px; }
+.app-header h1 {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.app-header .ver {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: .06em;
+  margin-top: 2px;
+}
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ── STATUS STRIP ───────────────────────────────────────── */
+.status-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.stat-card {
+  background: var(--surf0);
+  border: 1px solid var(--bdr);
+  border-radius: var(--r);
+  padding: 12px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--bdr2);
+  transition: background .3s;
+}
+.stat-card.ok::before  { background: var(--green); }
+.stat-card.warn::before { background: var(--amber); }
+.stat-card.err::before  { background: var(--red); }
+.stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 3px;
+  color: var(--text);
+  transition: color .3s;
+}
+.stat-card.err .stat-value { color: var(--red); }
+.stat-card.warn .stat-value { color: var(--amber); }
+.stat-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.stat-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--bdr);
+  overflow: hidden;
+}
+.stat-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  background: var(--green);
+  transition: width .35s ease, background .3s;
+}
+.mode-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 4px;
+  border: 1px solid var(--bdr2);
+  color: var(--muted);
+  letter-spacing: .04em;
+  transition: border-color .3s, color .3s;
+}
+
+/* ── SECTION SHELL ──────────────────────────────────────── */
+.section {
+  background: var(--surf0);
+  border: 1px solid var(--bdr);
+  border-radius: var(--r);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.sec-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  cursor: pointer;
+  background: var(--surf1);
+  border-bottom: 1px solid var(--bdr);
+  user-select: none;
+}
+.sec-hdr:hover { background: var(--surf2); }
+.sec-hdr h2 {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sec-hdr .chev {
+  font-size: 10px;
+  color: var(--golddim);
+  transition: transform .2s;
+}
+.sec-hdr.closed .chev { transform: rotate(-90deg); }
+.sec-body { padding: 16px; }
+.sec-body.hidden { display: none; }
+
+/* ── TABLES ─────────────────────────────────────────────── */
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; }
+th, td {
+  border: 1px solid var(--bdr);
+  padding: 5px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+th {
+  background: var(--surf2);
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: .04em;
+  font-size: 11px;
+}
+tbody tr:hover td { background: rgba(255,255,255,.025); }
+.r { text-align: right; }
+.c { text-align: center; }
+
+/* row states */
+tr.partial td { background: #211800 !important; }
+tr.nostack td { background: #0e1a2a !important; }
+tr.warn    td { background: #221206 !important; }
+
+/* ── INPUTS ─────────────────────────────────────────────── */
+input, select {
+  font-size: 12px;
+  padding: 4px 6px;
+  background: #090a0f;
+  color: var(--text);
+  border: 1px solid var(--bdr2);
+  border-radius: 3px;
+  width: 100%;
+  font-family: inherit;
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(240,192,64,.12);
+}
+input::placeholder { color: var(--muted); }
+
+/* ── BUTTONS ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 1px solid var(--gold);
+  background: var(--gold);
+  color: #111;
+  white-space: nowrap;
+  transition: background .15s;
+  font-family: inherit;
+}
+.btn:hover { background: #ffe070; }
+.btn-ghost {
+  background: transparent;
+  border-color: var(--bdr2);
+  color: var(--muted);
+}
+.btn-ghost:hover { border-color: var(--golddim); color: var(--gold); background: transparent; }
+.btn-sm { padding: 3px 8px; font-size: 11px; }
+.btn-del {
+  background: transparent;
+  border-color: var(--bdr2);
+  color: var(--muted);
+  padding: 3px 7px;
+  font-size: 12px;
+}
+.btn-del:hover { border-color: var(--red); color: var(--red); background: transparent; }
+.ctrl-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; align-items: center; }
+.save-msg {
+  font-size: 11px;
+  color: var(--green);
+  opacity: 0;
+  transition: opacity .4s;
+  margin-left: 4px;
+}
+
+/* ── LINE ITEMS TABLE ───────────────────────────────────── */
+#linesTable th:nth-child(1),
+#linesTable td:nth-child(1) { width: 52px; }   /* reorder */
+#linesTable th:nth-child(2),
+#linesTable td:nth-child(2) { min-width: 130px; } /* SKU */
+#linesTable th:nth-child(3),
+#linesTable td:nth-child(3) { width: 70px; }   /* qty */
+#linesTable th:nth-child(4),
+#linesTable td:nth-child(4) { width: 80px; }   /* wt ovr */
+#linesTable th:nth-child(5),
+#linesTable td:nth-child(5) { width: 80px; }   /* pq ovr */
+#linesTable th:nth-child(6),
+#linesTable td:nth-child(6) { width: 90px; }   /* no-stack ovr */
+
+/* ── RESULTS TABLE ──────────────────────────────────────── */
+.results-section { margin-top: 18px; }
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--bdr);
+  font-size: 12px;
+}
+.result-row:last-child { border-bottom: none; }
+.result-label { color: var(--muted); }
+.result-val { font-weight: 600; font-family: var(--mono); }
+
+/* ── STACK CHIP ─────────────────────────────────────────── */
+.stack-chip {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .03em;
+}
+.sc-double { background: #0d2a1a; color: var(--green); border: 1px solid #1a4a2a; }
+.sc-triple { background: #0a1e35; color: var(--blue); border: 1px solid #1a3a5a; }
+.sc-none   { background: #1e1006; color: var(--amber); border: 1px solid #3a2010; }
+.sc-frag   { background: #1e0808; color: var(--red);   border: 1px solid #3a1010; }
+
+/* ── AXLE CARDS ─────────────────────────────────────────── */
+.axle-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 14px 0;
+}
+.axle-card {
+  background: var(--surf1);
+  border: 1px solid var(--bdr);
+  border-radius: var(--r);
+  padding: 10px 14px;
+}
+.axle-card-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.axle-card-val {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.axle-card-limit { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+.axle-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--bdr);
+  overflow: hidden;
+}
+.axle-bar-fill {
+  height: 100%;
+  background: var(--green);
+  transition: width .35s, background .3s;
+}
+
+/* ── PARTIAL SUGGESTIONS ────────────────────────────────── */
+.partial-card {
+  background: var(--surf1);
+  border: 1px solid var(--bdr);
+  border-left: 3px solid var(--amber);
+  border-radius: var(--r);
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.partial-merge { color: var(--green); font-size: 11px; margin-top: 3px; }
+.warn-card {
+  background: #1a0e04;
+  border: 1px solid #4a2a08;
+  border-left: 3px solid var(--amber);
+  border-radius: var(--r);
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.warn-card.err { background: #160606; border-color: #4a1010; border-left-color: var(--red); }
+.warn-title { font-weight: 700; color: var(--amber); margin-bottom: 2px; }
+.warn-card.err .warn-title { color: var(--red); }
+
+/* ── PRINT ───────────────────────────────────────────────── */
+@media print {
+  body { background: #fff; color: #000; }
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  .app-header { border-color: #ccc; }
+  .app-header h1 { color: #000; }
+  .section { border-color: #ccc; background: #fff; break-inside: avoid; }
+  .sec-hdr { background: #f5f5f5; }
+  .sec-body.hidden { display: block !important; }
+  th { background: #eee; color: #333; }
+  th, td { border-color: #ccc; }
+  .status-strip { display: none; }
+  input, select { border: none; background: transparent; color: #000; padding: 0; }
+  .stat-card { background: #f8f8f8; border-color: #ddd; }
+  .stack-chip { border: 1px solid #999; }
+}
+.print-only { display: none; }
+
+/* ── MISC ────────────────────────────────────────────────── */
+.note { font-size: 11px; color: var(--muted); margin-top: 8px; }
+.sep { border: none; border-top: 1px solid var(--bdr); margin: 14px 0; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 800px) {
+  .status-strip { grid-template-columns: 1fr 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .axle-row { grid-template-columns: 1fr 1fr; }
+  .results-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- HEADER                                                 -->
+<!-- ══════════════════════════════════════════════════════ -->
+<header class="app-header no-print">
+  <img src="firman-logo.png" alt="" onerror="this.style.display='none'">
+  <div>
+    <h1>PalletMaster</h1>
+    <div class="ver">Load Calculator · v7</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Print</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportCsv()">↓ CSV</button>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- STATUS STRIP (always visible)                          -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="status-strip no-print">
+  <div class="stat-card" id="card-gvw">
+    <div class="stat-label">Gross Vehicle Weight</div>
+    <div class="stat-value" id="sv-gvw">— lb</div>
+    <div class="stat-sub" id="ss-gvw">of 80,000 lb federal max</div>
+    <div class="stat-bar"><div class="stat-bar-fill" id="sb-gvw"></div></div>
+  </div>
+  <div class="stat-card" id="card-floor">
+    <div class="stat-label">Floor Spaces</div>
+    <div class="stat-value" id="sv-floor">— / —</div>
+    <div class="stat-sub" id="ss-floor">trailer floor utilization</div>
+    <div class="stat-bar"><div class="stat-bar-fill" id="sb-floor"></div></div>
+  </div>
+  <div class="stat-card" id="card-payload">
+    <div class="stat-label">Payload Used</div>
+    <div class="stat-value" id="sv-payload">— lb</div>
+    <div class="stat-sub" id="ss-payload">of payload capacity</div>
+    <div class="stat-bar"><div class="stat-bar-fill" id="sb-payload"></div></div>
+  </div>
+  <div class="stat-card" id="card-mode">
+    <div class="stat-label">Ship Mode</div>
+    <div class="stat-value" id="sv-mode" style="font-size:16px">—</div>
+    <div class="mode-badge" id="mode-badge">—</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SHIPMENT LINES                                         -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="section" id="sec-lines">
+  <div class="sec-hdr" onclick="toggleSec('sec-lines')">
+    <h2>Shipment Lines</h2>
+    <span class="chev">▼</span>
+  </div>
+  <div class="sec-body" id="bdy-lines">
+    <div class="ctrl-row">
+      <button class="btn" onclick="addLine()">+ Add Line</button>
+      <button class="btn btn-ghost" onclick="clearLines()">Clear All</button>
+    </div>
+    <div class="tbl-wrap">
+      <table id="linesTable">
+        <thead>
+          <tr>
+            <th class="c no-print"></th>
+            <th>SKU / Model</th>
+            <th>Qty</th>
+            <th>Wt Override (lb)</th>
+            <th>PQ Override</th>
+            <th>No-Stack Override</th>
+            <th class="no-print"></th>
+          </tr>
+        </thead>
+        <tbody id="linesBody"></tbody>
+      </table>
+    </div>
+    <p class="note">Type a SKU and tab — fields auto-fill from SKU Master. Override only what differs from the master. Leave overrides blank to use master values.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- RESULTS                                                -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="section" id="sec-results">
+  <div class="sec-hdr" onclick="toggleSec('sec-results')">
+    <h2>Load Results</h2>
+    <span class="chev">▼</span>
+  </div>
+  <div class="sec-body" id="bdy-results">
+
+    <!-- Per-line breakdown -->
+    <div class="tbl-wrap">
+      <table id="resultsTable">
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th class="r">Qty</th>
+            <th class="r">Pallets</th>
+            <th class="r">Floor Spaces</th>
+            <th>Stack Config</th>
+            <th class="r">Pallet Ht (in)</th>
+            <th class="r">Line Weight (lb)</th>
+            <th class="r">Cube (ft³)</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+        <tfoot>
+          <tr>
+            <td><strong>Total</strong></td>
+            <td class="r"><strong id="rt-units">0</strong></td>
+            <td class="r"><strong id="rt-pallets">0</strong></td>
+            <td class="r"><strong id="rt-floor">0</strong></td>
+            <td></td>
+            <td></td>
+            <td class="r"><strong id="rt-wt">0</strong></td>
+            <td class="r"><strong id="rt-cube">0</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Partial pallet suggestions -->
+    <div id="partialSuggestions" style="margin-top:14px"></div>
+    <!-- Height warnings -->
+    <div id="heightWarnings" style="margin-top:6px"></div>
+
+    <hr class="sep">
+
+    <!-- Axle estimates -->
+    <div>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:2px">Axle Weight Estimates — Federal Bridge Formula B</div>
+      <div class="note" style="margin-bottom:10px">Geometry-based. Tractor: steer <span id="ax-steerbase">12,000</span> lb + drives <span id="ax-drivesbase">23,000</span> lb. Cargo distributed by lever-arm from kingpin position.</div>
+      <div class="axle-row">
+        <div class="axle-card" id="axcard-steer">
+          <div class="axle-card-label">Steer Axle</div>
+          <div class="axle-card-val" id="axv-steer">— lb</div>
+          <div class="axle-card-limit">Limit: 20,000 lb</div>
+          <div class="axle-bar"><div class="axle-bar-fill" id="axb-steer"></div></div>
+        </div>
+        <div class="axle-card" id="axcard-drives">
+          <div class="axle-card-label">Drive Tandem</div>
+          <div class="axle-card-val" id="axv-drives">— lb</div>
+          <div class="axle-card-limit">Limit: 34,000 lb</div>
+          <div class="axle-bar"><div class="axle-bar-fill" id="axb-drives"></div></div>
+        </div>
+        <div class="axle-card" id="axcard-trailer">
+          <div class="axle-card-label">Trailer Tandem</div>
+          <div class="axle-card-val" id="axv-trailer">— lb</div>
+          <div class="axle-card-limit">Limit: 34,000 lb</div>
+          <div class="axle-bar"><div class="axle-bar-fill" id="axb-trailer"></div></div>
+        </div>
+        <div class="axle-card" id="axcard-gvw">
+          <div class="axle-card-label">Gross Vehicle Weight</div>
+          <div class="axle-card-val" id="axv-gvw">— lb</div>
+          <div class="axle-card-limit">Limit: 80,000 lb federal</div>
+          <div class="axle-bar"><div class="axle-bar-fill" id="axb-gvw"></div></div>
+        </div>
+      </div>
+      <div class="note" id="bridgeNote"></div>
+      <div id="axleWarnings" style="margin-top:6px"></div>
+    </div>
+
+    <hr class="sep">
+
+    <!-- Expandable full detail -->
+    <div class="section" id="sec-detail" style="margin-bottom:0;border-color:var(--bdr)">
+      <div class="sec-hdr" onclick="toggleSec('sec-detail')">
+        <h2>Full Detail</h2>
+        <span class="chev">▼</span>
+      </div>
+      <div class="sec-body hidden" id="bdy-detail">
+        <div class="two-col">
+          <div>
+            <div class="result-row"><span class="result-label">Product Weight (lb)</span><span class="result-val" id="d-prodwt">0</span></div>
+            <div class="result-row"><span class="result-label">Pallet Weight (lb)</span><span class="result-val" id="d-palwt">0</span></div>
+            <div class="result-row"><span class="result-label">Total Shipment Weight (lb)</span><span class="result-val" id="d-shipwt">0</span></div>
+            <div class="result-row"><span class="result-label">Non-stackable Pallets</span><span class="result-val" id="d-ns">0</span></div>
+            <div class="result-row"><span class="result-label">Stackable Pallets</span><span class="result-val" id="d-st">0</span></div>
+            <div class="result-row"><span class="result-label">Floor Sp — Non-stack (1:1)</span><span class="result-val" id="d-fns">0</span></div>
+            <div class="result-row"><span class="result-label">Floor Sp — Stackable ⌈N/2⌉</span><span class="result-val" id="d-fst">0</span></div>
+            <div class="result-row"><span class="result-label">Total Floor Spaces</span><span class="result-val" id="d-tfloor">0</span></div>
+            <div class="result-row"><span class="result-label">Floor Utilization</span><span class="result-val" id="d-floorutl">—</span></div>
+            <div class="result-row"><span class="result-label">Payload Utilization</span><span class="result-val" id="d-payutl">—</span></div>
+            <div class="result-row"><span class="result-label">Remaining Payload (lb)</span><span class="result-val" id="d-payrem">—</span></div>
+            <div class="result-row"><span class="result-label">Remaining Floor Spaces</span><span class="result-val" id="d-flooorem">—</span></div>
+          </div>
+          <div>
+            <div class="result-row"><span class="result-label">Rows Used</span><span class="result-val" id="d-rows">0</span></div>
+            <div class="result-row"><span class="result-label">Linear Feet Used</span><span class="result-val" id="d-linft">0 ft</span></div>
+            <div class="result-row"><span class="result-label">Total Cube (ft³)</span><span class="result-val" id="d-cube">0</span></div>
+            <div class="result-row"><span class="result-label">Trailer Interior Cube (ft³)</span><span class="result-val" id="d-trailcube">0</span></div>
+            <div class="result-row"><span class="result-label">Cube Utilization</span><span class="result-val" id="d-cubeutl">—</span></div>
+            <div class="result-row"><span class="result-label">Density (lb/ft³)</span><span class="result-val" id="d-density">—</span></div>
+            <div class="result-row"><span class="result-label">Bridge Formula B (5-axle)</span><span class="result-val" id="d-bridge">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PRINT-ONLY LOAD SHEET                                  -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="print-only" id="printSheet">
+  <div style="font-size:20px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px">Load Sheet</div>
+  <table id="printTable">
+    <thead>
+      <tr>
+        <th>SKU / Model</th>
+        <th class="r">Qty</th>
+        <th class="r">Pallets</th>
+        <th class="r">Floor Spaces</th>
+        <th>Stacking Instruction</th>
+        <th class="r">Line Weight (lb)</th>
+      </tr>
+    </thead>
+    <tbody id="printBody"></tbody>
+    <tfoot>
+      <tr>
+        <td><strong>Total</strong></td>
+        <td class="r"><strong id="pt-units">0</strong></td>
+        <td class="r"><strong id="pt-pallets">0</strong></td>
+        <td class="r"><strong id="pt-floor">0</strong></td>
+        <td></td>
+        <td class="r"><strong id="pt-wt">0</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+  <div style="margin-top:14px;font-size:12px;border-top:1px solid #ccc;padding-top:10px" id="printAxle"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SKU MASTER                                             -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="section no-print" id="sec-sku">
+  <div class="sec-hdr closed" onclick="toggleSec('sec-sku')">
+    <h2>SKU Master Data</h2>
+    <span class="chev">▼</span>
+  </div>
+  <div class="sec-body hidden" id="bdy-sku">
+    <div class="ctrl-row">
+      <button class="btn" onclick="addSkuRow()">+ Add SKU</button>
+      <button class="btn" onclick="saveSkuMaster()">Save</button>
+      <button class="btn btn-ghost" onclick="exportSkuJson()">Export JSON</button>
+      <label class="btn btn-ghost" style="cursor:pointer">
+        Import JSON
+        <input type="file" accept=".json" style="display:none" onchange="importSkuJson(event)">
+      </label>
+      <span class="save-msg" id="skuMsg">Saved ✓</span>
+    </div>
+    <p class="note" style="margin-bottom:10px">
+      Carton dimensions (L × W × H in inches) + TI (units per layer) determine pallet height and stacking eligibility automatically.
+      <strong>Do Not Stack</strong> overrides dimension math — use for fragile or open-frame items.
+      Floor spaces are calculated as ⌈carton length ÷ 40"⌉ for non-standard units.
+    </p>
+    <div class="tbl-wrap">
+      <table id="skuTable">
+        <thead>
+          <tr>
+            <th>Model / SKU</th>
+            <th>Unit Wt (lb)</th>
+            <th>Std PQ</th>
+            <th>Carton L (in)</th>
+            <th>Carton W (in)</th>
+            <th>Carton H (in)</th>
+            <th>Units/Layer (TI)</th>
+            <th>Do Not Stack</th>
+            <th>Own Pallet?</th>
+            <th>Pallet Type</th>
+            <th>Stack Eligibility</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="skuBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- GLOBAL SETTINGS                                        -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="section no-print" id="sec-global">
+  <div class="sec-hdr closed" onclick="toggleSec('sec-global')">
+    <h2>Global Settings</h2>
+    <span class="chev">▼</span>
+  </div>
+  <div class="sec-body hidden" id="bdy-global">
+    <div class="two-col">
+      <div>
+        <table>
+          <tr><th colspan="2">Trailer &amp; Capacity</th></tr>
+          <tr>
+            <td>Trailer Type</td>
+            <td><select id="trailerType" onchange="applyTrailerPreset()" style="width:auto">
+              <option value="53dry">53′ Dry Van</option>
+              <option value="48dry">48′ Dry Van</option>
+              <option value="ltl">LTL / Shared</option>
+            </select></td>
+          </tr>
+          <tr><td>Max Payload (lb)</td><td><input type="number" id="maxPayload" value="43600" style="width:100px" oninput="recalc()"></td></tr>
+          <tr><td>Max Floor Spaces</td><td><input type="number" id="maxFloor" value="30" style="width:60px" oninput="recalc()"></td></tr>
+          <tr><td>Trailer Length (ft)</td><td><input type="number" id="trailerLen" value="53" style="width:60px" oninput="recalc()"></td></tr>
+          <tr><td>Interior Width (in)</td><td><input type="number" id="trailerW" value="100" style="width:60px" oninput="recalc()"></td></tr>
+          <tr><td>Interior Height (in)</td><td><input type="number" id="trailerH" value="110" style="width:60px" oninput="recalc()"></td></tr>
+          <tr><td>Pallet Depth in Truck Direction (in)</td><td><input type="number" id="palDepth" value="40" style="width:60px" oninput="recalc()"></td></tr>
+        </table>
+      </div>
+      <div>
+        <table>
+          <tr><th colspan="2">Weights &amp; Geometry</th></tr>
+          <tr><td>CHEP Pallet Weight (lb)</td><td><input type="number" id="chepWt" value="58" style="width:70px" oninput="recalc()"></td></tr>
+          <tr><td>#1 Pallet Weight (lb)</td><td><input type="number" id="no1Wt" value="43" style="width:70px" oninput="recalc()"></td></tr>
+          <tr><td>Tractor Steer Weight (lb)</td><td><input type="number" id="tractorSteer" value="12000" style="width:80px" oninput="recalc()"></td></tr>
+          <tr><td>Tractor Drive Weight (lb)</td><td><input type="number" id="tractorDrives" value="23000" style="width:80px" oninput="recalc()"></td></tr>
+          <tr><td>Kingpin to Rear Trailer Axle (ft)</td><td><input type="number" id="kpToRear" value="41" style="width:60px" oninput="recalc()"></td></tr>
+          <tr><th colspan="2">Mode Thresholds</th></tr>
+          <tr><td>LTL max floor spaces</td><td><input type="number" id="ltlMaxFloor" value="8" style="width:60px" oninput="recalc()"></td></tr>
+          <tr><td>LTL max weight (lb)</td><td><input type="number" id="ltlMaxWt" value="10000" style="width:80px" oninput="recalc()"></td></tr>
+          <tr><td>Partial TL max floor spaces</td><td><input type="number" id="ptlMaxFloor" value="18" style="width:60px" oninput="recalc()"></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app-shell -->
+<datalist id="skuDatalist"></datalist>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ── STORAGE KEYS ─────────────────────────────────────────
+var SKU_KEY  = 'pm_sku_v7';
+var COLL_KEY = 'pm_collapse_v7';
+
+// ── HELPERS ───────────────────────────────────────────────
+function gv(id){ return parseFloat(document.getElementById(id).value)||0; }
+function gs(id){ return (document.getElementById(id).value||'').trim(); }
+function el(id){ return document.getElementById(id); }
+function setText(id,v){ var e=el(id); if(e) e.textContent=v; }
+function esc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function fmt(n){ return Number(n).toLocaleString(undefined,{maximumFractionDigits:1}); }
+function fmtI(n){ return Math.round(n).toLocaleString(); }
+
+// ── SECTION COLLAPSE ─────────────────────────────────────
+function toggleSec(id){
+  var sec=el(id);
+  var bdy=sec.querySelector('.sec-body');
+  var hdr=sec.querySelector('.sec-hdr');
+  var closing=!bdy.classList.contains('hidden');
+  bdy.classList.toggle('hidden',closing);
+  hdr.classList.toggle('closed',closing);
+  saveCollapse();
+}
+function expandAll(){ document.querySelectorAll('.sec-body').forEach(function(b){b.classList.remove('hidden');}); document.querySelectorAll('.sec-hdr').forEach(function(h){h.classList.remove('closed');}); saveCollapse(); }
+function collapseAll(){ document.querySelectorAll('.sec-body').forEach(function(b){b.classList.add('hidden');}); document.querySelectorAll('.sec-hdr').forEach(function(h){h.classList.add('closed');}); saveCollapse(); }
+function saveCollapse(){
+  var s={};
+  document.querySelectorAll('.section[id]').forEach(function(sec){ s[sec.id]=sec.querySelector('.sec-body').classList.contains('hidden'); });
+  try{ localStorage.setItem(COLL_KEY,JSON.stringify(s)); }catch(e){}
+}
+function restoreCollapse(){
+  var raw; try{ raw=localStorage.getItem(COLL_KEY); }catch(e){}
+  if(!raw) return;
+  var s; try{ s=JSON.parse(raw); }catch(e){ return; }
+  document.querySelectorAll('.section[id]').forEach(function(sec){
+    if(s[sec.id]){
+      var b=sec.querySelector('.sec-body'); var h=sec.querySelector('.sec-hdr');
+      if(b) b.classList.add('hidden');
+      if(h) h.classList.add('closed');
+    }
+  });
+}
+
+// ── TRAILER PRESETS ───────────────────────────────────────
+function applyTrailerPreset(){
+  var t=gs('trailerType');
+  if(t==='53dry'){ el('maxFloor').value=30; el('trailerLen').value=53; el('maxPayload').value=43600; }
+  else if(t==='48dry'){ el('maxFloor').value=26; el('trailerLen').value=48; el('maxPayload').value=43600; }
+  else if(t==='ltl'){ el('maxFloor').value=30; el('trailerLen').value=53; el('maxPayload').value=43600; }
+  recalc();
+}
+
+// ── SKU MASTER ────────────────────────────────────────────
+function skuDefaults(){ return {model:'',unitWt:'',stdPQ:'',cL:'',cW:'',cH:'',ti:'',doNotStack:'N',ownPallet:'Y',palType:'#1'}; }
+
+function addSkuRow(d){
+  var v=d||skuDefaults();
+  var tr=document.createElement('tr');
+  tr.innerHTML=
+    '<td><input type="text" value="'+esc(v.model)+'" class="sku-model-inp" oninput="onSkuMasterChange(this)" style="width:120px"></td>'+
+    '<td><input type="number" step="0.01" value="'+esc(v.unitWt)+'" oninput="onSkuMasterChange(this)" style="width:65px"></td>'+
+    '<td><input type="number" step="1" value="'+esc(v.stdPQ)+'" oninput="onSkuMasterChange(this)" style="width:50px"></td>'+
+    '<td><input type="number" step="0.1" value="'+esc(v.cL)+'" oninput="onSkuMasterChange(this)" style="width:55px"></td>'+
+    '<td><input type="number" step="0.1" value="'+esc(v.cW)+'" oninput="onSkuMasterChange(this)" style="width:55px"></td>'+
+    '<td><input type="number" step="0.1" value="'+esc(v.cH)+'" oninput="onSkuMasterChange(this)" style="width:55px"></td>'+
+    '<td><input type="number" step="1" value="'+esc(v.ti)+'" oninput="onSkuMasterChange(this)" style="width:50px"></td>'+
+    '<td class="c"><select onchange="onSkuMasterChange(this)" style="width:55px">'+mkOpts(['N','Y'],v.doNotStack)+'</select></td>'+
+    '<td class="c"><select onchange="onSkuMasterChange(this)" style="width:55px">'+mkOpts(['Y','N'],v.ownPallet)+'</select></td>'+
+    '<td><select onchange="onSkuMasterChange(this)" style="width:70px">'+mkOpts(['#1','CHEP','PRODUCT'],v.palType)+'</select></td>'+
+    '<td class="stack-elig" style="min-width:140px"><span class="stack-chip sc-none">—</span></td>'+
+    '<td class="c"><button class="btn-del btn-sm" onclick="delSkuRow(this)">✕</button></td>';
+  el('skuBody').appendChild(tr);
+  updateSkuEligibility(tr);
+  rebuildDatalist();
+}
+
+function onSkuMasterChange(inp){
+  var tr=inp.closest('tr');
+  updateSkuEligibility(tr);
+  rebuildDatalist();
+}
+
+function updateSkuEligibility(tr){
+  var inp=tr.querySelectorAll('input,select');
+  var cH=parseFloat(inp[5].value)||0;
+  var ti=parseFloat(inp[6].value)||0;
+  var stdPQ=parseFloat(inp[2].value)||0;
+  var doNotStack=inp[7].value;
+  var trailerHt=gv('trailerH')||110;
+  var palDepth=gv('palDepth')||40;
+
+  var eligEl=tr.querySelector('.stack-elig');
+  if(!eligEl) return;
+
+  if(doNotStack==='Y'){
+    eligEl.innerHTML='<span class="stack-chip sc-frag">Do Not Stack</span>';
+    return;
+  }
+  if(!cH||!ti||!stdPQ){ eligEl.innerHTML='<span class="stack-chip sc-none">Need dimensions</span>'; return; }
+
+  var layers=Math.ceil(stdPQ/ti);
+  var palHt=layers*cH+6; // +6" pallet board
+  var doubleHt=palHt*2;
+  var tripleHt=palHt*3;
+
+  if(tripleHt<=trailerHt){
+    eligEl.innerHTML='<span class="stack-chip sc-triple">Triple OK ('+Math.round(tripleHt)+'")</span>';
+  } else if(doubleHt<=trailerHt){
+    eligEl.innerHTML='<span class="stack-chip sc-double">Double OK ('+Math.round(doubleHt)+'")</span>';
+  } else {
+    eligEl.innerHTML='<span class="stack-chip sc-none">Single only ('+Math.round(palHt)+'" tall)</span>';
+  }
+}
+
+function delSkuRow(btn){
+  btn.closest('tr').remove();
+  rebuildDatalist();
+  recalc();
+}
+
+function mkOpts(vals,sel){
+  return vals.map(function(v){ return '<option value="'+v+'"'+(v===sel?' selected':'')+'>'+v+'</option>'; }).join('');
+}
+
+function readSkuMaster(){
+  return Array.from(el('skuBody').querySelectorAll('tr')).map(function(tr){
+    var i=tr.querySelectorAll('input,select');
+    if(!i.length) return null;
+    return {
+      model:(i[0].value||'').trim(), unitWt:parseFloat(i[1].value)||0,
+      stdPQ:parseFloat(i[2].value)||0, cL:parseFloat(i[3].value)||0,
+      cW:parseFloat(i[4].value)||0, cH:parseFloat(i[5].value)||0,
+      ti:parseFloat(i[6].value)||0, doNotStack:i[7].value,
+      ownPallet:i[8].value, palType:i[9].value
+    };
+  }).filter(function(r){ return r&&r.model; });
+}
+
+function saveSkuMaster(){
+  try{ localStorage.setItem(SKU_KEY,JSON.stringify(readSkuMaster())); }catch(e){}
+  var msg=el('skuMsg'); msg.style.opacity='1';
+  setTimeout(function(){ msg.style.opacity='0'; },2000);
+}
+
+function loadSkuMaster(){
+  var raw; try{ raw=localStorage.getItem(SKU_KEY); }catch(e){}
+  var list=[]; if(raw){ try{ list=JSON.parse(raw); }catch(e){} }
+  el('skuBody').innerHTML='';
+  if(!list.length){ addSkuRow(); } else { list.forEach(addSkuRow); }
+  rebuildDatalist();
+}
+
+function rebuildDatalist(){
+  var dl=el('skuDatalist'); dl.innerHTML='';
+  readSkuMaster().forEach(function(s){
+    var o=document.createElement('option'); o.value=s.model; dl.appendChild(o);
+  });
+}
+
+function exportSkuJson(){
+  var blob=new Blob([JSON.stringify(readSkuMaster(),null,2)],{type:'application/json'});
+  dlBlob(blob,'sku_master.json');
+}
+
+function importSkuJson(e){
+  var f=e.target.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{
+      var list=JSON.parse(ev.target.result);
+      el('skuBody').innerHTML='';
+      list.forEach(addSkuRow);
+      rebuildDatalist();
+      try{ localStorage.setItem(SKU_KEY,JSON.stringify(list)); }catch(err){}
+      var msg=el('skuMsg'); msg.textContent='Imported ✓'; msg.style.opacity='1';
+      setTimeout(function(){ msg.style.opacity='0'; msg.textContent='Saved ✓'; },2500);
+    }catch(err){
+      var msg=el('skuMsg'); msg.textContent='Error reading file'; msg.style.color='var(--red)'; msg.style.opacity='1';
+      setTimeout(function(){ msg.style.opacity='0'; msg.style.color='var(--green)'; msg.textContent='Saved ✓'; },3000);
+    }
+  };
+  r.readAsText(f);
+}
+
+// ── LINE ITEMS ────────────────────────────────────────────
+function addLine(){
+  var tr=document.createElement('tr');
+  tr.innerHTML=
+    '<td class="c no-print" style="white-space:nowrap">'+
+      '<button class="btn-del btn-sm" onclick="moveLine(this,-1)" title="Up" style="padding:2px 5px">↑</button>'+
+      '<button class="btn-del btn-sm" onclick="moveLine(this,1)" title="Down" style="padding:2px 5px">↓</button>'+
+    '</td>'+
+    '<td><input list="skuDatalist" style="width:130px" class="sku-inp" onchange="applySkuToLine(this)" onblur="applySkuToLine(this)" oninput="recalc()"></td>'+
+    '<td><input type="number" step="1" min="0" style="width:65px" oninput="recalc()"></td>'+
+    '<td><input type="number" step="0.01" style="width:75px" placeholder="from master" oninput="recalc()"></td>'+
+    '<td><input type="number" step="1" style="width:65px" placeholder="from master" oninput="recalc()"></td>'+
+    '<td class="c"><select style="width:80px" onchange="recalc()"><option value="">Master</option><option value="N">Allow Stack</option><option value="Y">No Stack</option></select></td>'+
+    '<td class="c no-print"><button class="btn-del" onclick="deleteLine(this)">✕</button></td>';
+  el('linesBody').appendChild(tr);
+}
+
+function deleteLine(btn){
+  var tr=btn.closest('tr');
+  var inp=tr.querySelectorAll('input');
+  var hasData=inp[0]&&inp[0].value.trim();
+  if(hasData&&!confirm('Remove this line?')) return;
+  tr.remove(); recalc();
+}
+
+function clearLines(){
+  if(!confirm('Clear all shipment lines?')) return;
+  el('linesBody').innerHTML=''; addLine(); recalc();
+}
+
+function moveLine(btn,dir){
+  var tr=btn.closest('tr');
+  var tb=tr.parentNode;
+  var rows=Array.from(tb.querySelectorAll('tr'));
+  var idx=rows.indexOf(tr);
+  var t=idx+dir;
+  if(t<0||t>=rows.length) return;
+  dir===-1?tb.insertBefore(tr,rows[t]):tb.insertBefore(rows[t],tr);
+  recalc();
+}
+
+function applySkuToLine(inp){
+  var code=(inp.value||'').trim();
+  if(!code) return;
+  var sku=readSkuMaster().find(function(s){ return s.model===code; });
+  if(!sku) return;
+  var tr=inp.closest('tr');
+  var allInp=tr.querySelectorAll('input');
+  // allInp: [0]=sku, [1]=qty, [2]=wtOverride, [3]=pqOverride
+  // Only set if currently blank (don't overwrite user edits)
+  if(!allInp[2].value) allInp[2].value='';  // leave wt override blank — shown as placeholder
+  if(!allInp[3].value) allInp[3].value='';
+  tr.dataset.skuModel=sku.model;
+  recalc();
+}
+
+// ── CORE RECALC ───────────────────────────────────────────
+function recalc(){
+  var skuMaster=readSkuMaster();
+  function findSku(code){ return skuMaster.find(function(s){ return s.model===code; })||null; }
+
+  var chepWt=gv('chepWt'); var no1Wt=gv('no1Wt');
+  var maxPayload=gv('maxPayload'); var maxFloor=gv('maxFloor');
+  var trailerHt=gv('trailerH')||110; var palDepth=gv('palDepth')||40;
+  var trailerLen=gv('trailerLen')||53;
+  var tractorSteer=gv('tractorSteer')||12000; var tractorDrives=gv('tractorDrives')||23000;
+
+  var sumProdWt=0,sumPalWt=0,sumTotalWt=0;
+  var totalUnits=0,totalPallets=0,totalFloor=0,totalCubeIn=0;
+  var nsP=0,stP=0; // non-stack, stackable pallet counts
+  var allPallets=[],partials=[],htWarns=[];
+  var resultsRows=[];
+
+  el('resultsBody').innerHTML='';
+
+  el('linesBody').querySelectorAll('tr').forEach(function(tr){
+    tr.classList.remove('partial','nostack','warn');
+    var inp=tr.querySelectorAll('input');
+    var sel=tr.querySelectorAll('select');
+    if(!inp.length) return;
+
+    var skuCode=(inp[0].value||'').trim();
+    var qty=parseFloat(inp[1].value)||0;
+    var wtOvr=inp[2].value.trim()!==''?parseFloat(inp[2].value):null;
+    var pqOvr=inp[3].value.trim()!==''?parseFloat(inp[3].value):null;
+    var nsOvr=sel[0]?sel[0].value:''; // ''=master, 'Y'=force no stack, 'N'=allow
+
+    var sku=findSku(skuCode);
+
+    var unitWt  = wtOvr!==null ? wtOvr  : (sku?sku.unitWt:0);
+    var effPQ   = pqOvr!==null ? pqOvr  : (sku?sku.stdPQ:0);
+    var cL      = sku?sku.cL:0; var cW=sku?sku.cW:0; var cH=sku?sku.cH:0;
+    var ti      = sku?sku.ti:0;
+    var ownPallet = sku?sku.ownPallet:'Y';
+    var palType   = sku?sku.palType:'#1';
+    var doNotStackMaster = sku?sku.doNotStack:'N';
+
+    // resolve no-stack: line override wins if set
+    var doNotStack = nsOvr===''?doNotStackMaster:nsOvr;
+
+    if(!qty||!unitWt||!effPQ){ return; }
+
+    totalUnits+=qty;
+    var full=Math.floor(qty/effPQ);
+    var left=qty%effPQ;
+    var isPartial=left>0;
+    var palCt=full+(isPartial?1:0);
+    totalPallets+=palCt;
+
+    // pallet weight
+    var palWtPer=(palType==='CHEP'?chepWt:(palType==="#1"?no1Wt:0));
+    var palWtLine=(ownPallet==='Y'&&palType!=='PRODUCT')?palCt*palWtPer:0;
+    var prodWt=qty*unitWt;
+    var lineWt=prodWt+palWtLine;
+    sumProdWt+=prodWt; sumPalWt+=palWtLine; sumTotalWt+=lineWt;
+
+    // floor spaces — from dimensions, fallback to 1
+    var unitLen=cL>0?cL:48;
+    var floorPerPallet=Math.max(1,Math.ceil(unitLen/palDepth));
+
+    // pallet height from dimensions
+    var palHt=0;
+    if(cH>0&&ti>0&&effPQ>0){
+      var layers=Math.ceil(effPQ/ti);
+      palHt=layers*cH+6;
+    }
+
+    // stackability from dimensions + flags
+    var canDouble=!doNotStack==='Y'; // initial
+    var canTriple=false;
+    var stackChip='';
+    var stackLabel='';
+
+    if(doNotStack==='Y'){
+      canDouble=false; canTriple=false;
+      stackChip='<span class="stack-chip sc-frag">Do Not Stack</span>';
+      stackLabel='Do NOT stack — fragile/restricted';
+    } else if(palHt>0){
+      var dHt=palHt*2; var tHt=palHt*3;
+      if(tHt<=trailerHt){
+        canDouble=true; canTriple=true;
+        stackChip='<span class="stack-chip sc-triple">Triple OK ('+Math.round(tHt)+'")</span>';
+        stackLabel='Triple-stack OK (3 high, stacked = '+Math.round(tHt)+'")';
+      } else if(dHt<=trailerHt){
+        canDouble=true; canTriple=false;
+        stackChip='<span class="stack-chip sc-double">Double OK ('+Math.round(dHt)+'")</span>';
+        stackLabel='Double-stack OK (2 high, stacked = '+Math.round(dHt)+'")';
+      } else {
+        canDouble=false; canTriple=false;
+        stackChip='<span class="stack-chip sc-none">Single only ('+Math.round(palHt)+'" tall)</span>';
+        stackLabel='Single layer only — too tall to stack (pallet '+Math.round(palHt)+'")';
+        if(palHt*2>trailerHt){ htWarns.push({sku:skuCode,palHt:palHt,dHt:Math.round(palHt*2),limit:trailerHt}); }
+      }
+    } else {
+      // no dims: fall back to no stack
+      canDouble=false; canTriple=false;
+      stackChip='<span class="stack-chip sc-none">No dims</span>';
+      stackLabel='No stacking data — add carton dimensions to SKU master';
+    }
+
+    // floor space accounting
+    var ownFS=(ownPallet==='Y')?palCt:0;
+    if(ownFS>0){
+      if(canTriple){ stP+=ownFS; }
+      else if(canDouble){ stP+=ownFS; }
+      else { nsP+=ownFS; }
+    }
+
+    var lineCubeFt=0;
+    if(cL>0&&cW>0&&cH>0&&qty>0){
+      var cubeIn3=qty*cL*cW*cH;
+      totalCubeIn+=cubeIn3;
+      lineCubeFt=cubeIn3/1728;
+    }
+
+    if(isPartial&&ownPallet==='Y'){
+      tr.classList.add('partial');
+      partials.push({sku:skuCode,left:left,effPQ:effPQ,palType:palType,canDouble:canDouble,canTriple:canTriple});
+    }
+    if(doNotStack==='Y') tr.classList.add('nostack');
+
+    // results table row
+    var rtr=document.createElement('tr');
+    rtr.innerHTML=
+      '<td>'+esc(skuCode||'—')+'</td>'+
+      '<td class="r">'+fmtI(qty)+'</td>'+
+      '<td class="r">'+palCt+'</td>'+
+      '<td class="r">'+(ownPallet==='Y'?palCt*floorPerPallet:0)+'</td>'+
+      '<td>'+stackChip+'</td>'+
+      '<td class="r">'+(palHt>0?Math.round(palHt)+'":':'—')+'</td>'+
+      '<td class="r">'+fmt(lineWt)+'</td>'+
+      '<td class="r">'+lineCubeFt.toFixed(1)+'</td>';
+    el('resultsBody').appendChild(rtr);
+
+    // build pallet objects for axle calc
+    if(ownPallet==='Y'){
+      for(var i=0;i<palCt;i++){
+        var isFull=i<full;
+        var unitsOn=isFull?effPQ:(left||effPQ);
+        var pw=unitsOn*unitWt+palWtPer;
+        allPallets.push({sku:skuCode,weight:pw,canDouble:canDouble,canTriple:canTriple,
+                         isPartial:!isFull,floorSpaces:floorPerPallet,palHt:palHt,stackLabel:stackLabel});
+      }
+    }
+  });
+
+  // floor space totals
+  var nsFS=nsP;
+  var stFS=Math.ceil(stP/2); // conservative: assume double, not triple, for floor space
+  var totalFS=nsFS+stFS;
+
+  // summary
+  var totalCubeFt=totalCubeIn/1728;
+  var trailerCube=(trailerLen*12*gv('trailerW')*trailerHt)/1728;
+  var floorUtil=maxFloor?(totalFS/maxFloor*100):0;
+  var payUtil=maxPayload?(sumTotalWt/maxPayload*100):0;
+
+  // foot totals
+  setText('rt-units',fmtI(totalUnits));
+  setText('rt-pallets',totalPallets);
+  setText('rt-floor',totalFS);
+  setText('rt-wt',fmt(sumTotalWt));
+  setText('rt-cube',totalCubeFt.toFixed(1));
+
+  // detail panel
+  setText('d-prodwt',fmt(sumProdWt));
+  setText('d-palwt',fmt(sumPalWt));
+  setText('d-shipwt',fmt(sumTotalWt));
+  setText('d-ns',nsP); setText('d-st',stP);
+  setText('d-fns',nsFS); setText('d-fst',stFS);
+  setText('d-tfloor',totalFS);
+  setText('d-floorutl',maxFloor?floorUtil.toFixed(1)+'%':'—');
+  setText('d-payutl',maxPayload?payUtil.toFixed(1)+'%':'—');
+  setText('d-payrem',maxPayload?fmt(Math.max(0,maxPayload-sumTotalWt)):'—');
+  setText('d-flooorem',maxFloor?Math.max(0,maxFloor-totalFS):'—');
+  setText('d-cube',totalCubeFt.toFixed(1));
+  setText('d-trailcube',trailerCube.toFixed(1));
+  setText('d-cubeutl',trailerCube?((totalCubeFt/trailerCube)*100).toFixed(1)+'%':'—');
+  setText('d-density',totalCubeFt?fmt(sumTotalWt/totalCubeFt):'—');
+
+  // load plan (for axle calc)
+  var plan=buildLoadPlan(allPallets,maxFloor);
+  setText('d-rows',plan.rowsUsed);
+  setText('d-linft',plan.linearFeet.toFixed(1)+' ft');
+
+  // axle calc
+  var axleResult=calcAxles(plan,sumTotalWt,tractorSteer,tractorDrives);
+  renderAxles(axleResult,tractorSteer,tractorDrives);
+
+  // mode
+  var mode=computeMode(sumTotalWt,totalFS);
+  renderStatus(sumTotalWt,totalFS,totalCubeFt,maxPayload,maxFloor,mode,axleResult);
+
+  // partials
+  renderPartials(partials);
+  // height warnings
+  renderHtWarns(htWarns);
+
+  // print sheet
+  buildPrintSheet(allPallets,sumTotalWt,totalUnits,totalPallets,totalFS,axleResult);
+}
+
+// ── LOAD PLAN ─────────────────────────────────────────────
+function buildLoadPlan(pallets,maxFloor){
+  var palDepth=gv('palDepth')||40;
+  var numRows=Math.ceil((maxFloor||30)/2);
+  var rows=[];
+  for(var i=0;i<numRows;i++) rows.push({pallets:[],weight:0,floorUsed:0});
+  if(!pallets.length) return {rows:rows,rowsUsed:0,linearFeet:0};
+
+  var ri=0,rowFloor=0,rowCap=2;
+  pallets.forEach(function(p){
+    var fs=p.floorSpaces||1;
+    if(rowFloor+fs<=rowCap){
+      rows[ri].pallets.push(p); rows[ri].weight+=p.weight; rows[ri].floorUsed+=fs; rowFloor+=fs;
+    } else {
+      ri++; if(ri>=numRows) ri=numRows-1;
+      rowFloor=0;
+      rows[ri].pallets.push(p); rows[ri].weight+=p.weight; rows[ri].floorUsed+=fs; rowFloor+=fs;
+    }
+  });
+
+  var lastUsed=0;
+  rows.forEach(function(r,i){ if(r.pallets.length) lastUsed=i; });
+  var rowsUsed=lastUsed+1;
+  return {rows:rows,rowsUsed:rowsUsed,linearFeet:rowsUsed*(palDepth/12)};
+}
+
+// ── AXLE CALC (Geometry / Bridge Formula B) ───────────────
+function calcAxles(plan,cargoWt,tractorSteer,tractorDrives){
+  var kpToRear=gv('kpToRear')||41;
+  var trailerLen=gv('trailerLen')||53;
+  var palDepthFt=(gv('palDepth')||40)/12;
+  var kpFromNose=trailerLen-kpToRear-2;
+
+  var cargoDrives=0,cargoTrailer=0;
+  plan.rows.forEach(function(row,i){
+    if(!row.pallets.length) return;
+    var rowCenter=i*palDepthFt+palDepthFt/2;
+    var distFromKP=rowCenter-kpFromNose;
+    var trailerFrac=Math.min(1,Math.max(0,distFromKP/kpToRear));
+    cargoTrailer+=row.weight*trailerFrac;
+    cargoDrives+=row.weight*(1-trailerFrac);
+  });
+
+  var steer=tractorSteer;
+  var drives=tractorDrives+cargoDrives;
+  var trailer=cargoTrailer;
+  var gvw=steer+drives+trailer;
+
+  // Bridge Formula B: W ≤ 500*(LN/(N-1)+12N+36)
+  function bfB(L,N){ return 500*((L*N)/(N-1)+12*N+36); }
+  var span5=20+4+kpToRear; // steer to trailer rear (approx)
+  var bf5=bfB(span5,5);
+
+  return {steer:steer,drives:drives,trailer:trailer,gvw:gvw,bf5:bf5,span5:span5};
+}
+
+function renderAxles(ax,tractorSteer,tractorDrives){
+  setText('ax-steerbase',fmtI(tractorSteer));
+  setText('ax-drivesbase',fmtI(tractorDrives));
+
+  var limits={steer:20000,drives:34000,trailer:34000,gvw:80000};
+  var vals={steer:ax.steer,drives:ax.drives,trailer:ax.trailer,gvw:ax.gvw};
+  var warns=[];
+
+  ['steer','drives','trailer','gvw'].forEach(function(k){
+    var v=vals[k]; var lim=limits[k];
+    var pct=lim?(v/lim*100):0;
+    setText('axv-'+k,fmtI(v)+' lb');
+    var bar=el('axb-'+k);
+    var card=el('axcard-'+k);
+    if(bar){ bar.style.width=Math.min(pct,110).toFixed(1)+'%'; bar.style.background=pct>100?'var(--red)':pct>90?'var(--amber)':'var(--green)'; }
+    if(card){ card.style.borderColor=pct>100?'var(--red)':pct>90?'#5a3a00':'var(--bdr)'; }
+    if(v>lim) warns.push({name:k,v:v,lim:lim,over:Math.round(v-lim)});
+  });
+
+  var bfOk=ax.gvw<=Math.min(ax.bf5,80000);
+  setText('d-bridge','5-axle span '+ax.span5.toFixed(0)+'ft → limit '+fmtI(ax.bf5)+' lb ('+(bfOk?'✓ OK':'⚠ Check')+')');
+  setText('bridgeNote','Bridge Formula B (5-axle, '+ax.span5.toFixed(0)+'ft span): limit '+fmtI(ax.bf5)+' lb | GVW '+fmtI(ax.gvw)+' lb → '+(bfOk?'✓ Within legal limit':'⚠ Exceeds formula limit — review load'));
+
+  var awEl=el('axleWarnings'); awEl.innerHTML='';
+  warns.forEach(function(w){
+    var d=document.createElement('div');
+    d.className='warn-card err';
+    d.innerHTML='<div class="warn-title">⚠ '+w.name.charAt(0).toUpperCase()+w.name.slice(1)+' Axle Over Limit</div>'+
+      fmtI(w.v)+' lb exceeds '+fmtI(w.lim)+' lb limit by '+fmtI(w.over)+' lb — adjust load distribution or reduce weight.';
+    awEl.appendChild(d);
+  });
+}
+
+// ── STATUS STRIP ──────────────────────────────────────────
+function computeMode(wt,fs){
+  var ltlF=gv('ltlMaxFloor')||8; var ltlW=gv('ltlMaxWt')||10000;
+  var ptlF=gv('ptlMaxFloor')||18;
+  if(wt===0&&fs===0) return '—';
+  if(wt<=150&&fs<=1) return 'Parcel';
+  if(wt<=ltlW&&fs<=ltlF) return 'LTL';
+  if(fs<=ptlF) return 'Partial TL';
+  return 'Truckload';
+}
+
+function renderStatus(wt,fs,cube,maxPayload,maxFloor,mode,ax){
+  var gwPct=ax.gvw/80000*100;
+  var fsPct=maxFloor?(fs/maxFloor*100):0;
+  var payPct=maxPayload?(wt/maxPayload*100):0;
+
+  function setCard(cid,vid,sub,sbid,pct,val,subTxt){
+    setText(vid,val);
+    setText(sub,subTxt);
+    var bar=el(sbid); if(bar){ bar.style.width=Math.min(pct,100).toFixed(1)+'%'; bar.style.background=pct>100?'var(--red)':pct>90?'var(--amber)':'var(--green)'; }
+    var card=el(cid);
+    if(card){ card.className='stat-card '+(pct>100?'err':pct>90?'warn':'ok'); }
+  }
+
+  setCard('card-gvw','sv-gvw','ss-gvw','sb-gvw',gwPct,fmtI(ax.gvw)+' lb',gwPct.toFixed(1)+'% of 80,000 lb');
+  setCard('card-floor','sv-floor','ss-floor','sb-floor',fsPct,fs+' / '+(maxFloor||'—'),maxFloor?fsPct.toFixed(1)+'% utilized':'');
+  setCard('card-payload','sv-payload','ss-payload','sb-payload',payPct,fmtI(wt)+' lb',maxPayload?payPct.toFixed(1)+'% of '+fmtI(maxPayload)+' lb':'');
+
+  var modeEl=el('sv-mode'); var pill=el('mode-badge');
+  if(modeEl) modeEl.textContent=mode;
+  var mc=mode==='—'?'var(--muted)':mode==='Truckload'||mode==='LTL'?'var(--green)':mode==='Partial TL'?'var(--amber)':'var(--muted)';
+  if(pill){ pill.textContent=mode; pill.style.borderColor=mc; pill.style.color=mc; }
+  var mcard=el('card-mode');
+  if(mcard){ mcard.className='stat-card '+(payPct>100||fsPct>100?'err':'ok'); }
+}
+
+// ── PARTIAL SUGGESTIONS ───────────────────────────────────
+function renderPartials(partials){
+  var el2=el('partialSuggestions'); el2.innerHTML='';
+  if(!partials.length) return;
+  partials.forEach(function(p,i){
+    var d=document.createElement('div'); d.className='partial-card';
+    d.innerHTML='<strong>'+esc(p.sku)+'</strong>: '+p.left+' / '+p.effPQ+' units on last pallet ('+p.palType+')';
+    var cands=partials.filter(function(q,j){ return j!==i&&q.canDouble===p.canDouble&&q.canTriple===p.canTriple&&q.palType===p.palType; });
+    if(cands.length){
+      d.innerHTML+='<div class="partial-merge">↳ Possible consolidation with: '+cands.map(function(c){ return '<strong>'+esc(c.sku)+'</strong> ('+c.left+' units)'; }).join(', ')+'</div>';
+    }
+    el2.appendChild(d);
+  });
+}
+
+// ── HEIGHT WARNINGS ───────────────────────────────────────
+function renderHtWarns(warns){
+  var el2=el('heightWarnings'); el2.innerHTML='';
+  warns.forEach(function(w){
+    var d=document.createElement('div'); d.className='warn-card';
+    d.innerHTML='<div class="warn-title">⚠ Stacking Height: '+esc(w.sku)+'</div>'+
+      'Double-stacked height ~'+w.dHt+'" exceeds trailer interior '+w.limit+'" — using single-layer configuration.';
+    el2.appendChild(d);
+  });
+}
+
+// ── PRINT SHEET ───────────────────────────────────────────
+function buildPrintSheet(pallets,totalWt,totalUnits,totalPallets,totalFloor,ax){
+  var pb=el('printBody'); pb.innerHTML='';
+
+  // group by SKU
+  var skuMap={};
+  pallets.forEach(function(p){
+    if(!skuMap[p.sku]) skuMap[p.sku]={pallets:0,floor:0,wt:0,stackLabel:p.stackLabel};
+    skuMap[p.sku].pallets++;
+    skuMap[p.sku].floor+=p.floorSpaces;
+    skuMap[p.sku].wt+=p.weight;
+  });
+
+  var totalQty=0;
+  el('linesBody').querySelectorAll('tr').forEach(function(tr){
+    var inp=tr.querySelectorAll('input');
+    if(!inp.length) return;
+    var code=(inp[0].value||'').trim();
+    var qty=parseFloat(inp[1].value)||0;
+    if(!code||!qty) return;
+    totalQty+=qty;
+    var s=skuMap[code];
+    if(!s) return;
+    var rtr=document.createElement('tr');
+    rtr.innerHTML=
+      '<td>'+esc(code)+'</td>'+
+      '<td class="r">'+fmtI(qty)+'</td>'+
+      '<td class="r">'+s.pallets+'</td>'+
+      '<td class="r">'+s.floor+'</td>'+
+      '<td>'+esc(s.stackLabel||'—')+'</td>'+
+      '<td class="r">'+fmt(s.wt)+'</td>';
+    pb.appendChild(rtr);
+  });
+
+  setText('pt-units',fmtI(totalQty));
+  setText('pt-pallets',totalPallets);
+  setText('pt-floor',totalFloor);
+  setText('pt-wt',fmt(totalWt));
+
+  el('printAxle').innerHTML=
+    'Axle Estimates — Steer: '+fmtI(ax.steer)+' lb  |  Drive Tandem: '+fmtI(ax.drives)+' lb  |  Trailer Tandem: '+fmtI(ax.trailer)+' lb  |  GVW: '+fmtI(ax.gvw)+' lb'+
+    ' (federal max 80,000 lb)';
+}
+
+// ── EXPORT CSV ────────────────────────────────────────────
+function exportCsv(){
+  var rows=[['SKU','Qty','Wt Override','PQ Override','No-Stack Override']];
+  el('linesBody').querySelectorAll('tr').forEach(function(tr){
+    var inp=tr.querySelectorAll('input');
+    var sel=tr.querySelectorAll('select');
+    if(!inp.length||!inp[0].value.trim()) return;
+    rows.push([inp[0].value,inp[1].value,inp[2].value,inp[3].value,sel[0]?sel[0].value:'']);
+  });
+  rows.push([]);
+  rows.push(['TOTALS','','','','']);
+  rows.push(['Total Units',el('rt-units').textContent]);
+  rows.push(['Total Pallets',el('rt-pallets').textContent]);
+  rows.push(['Floor Spaces',el('rt-floor').textContent]);
+  rows.push(['Shipment Weight (lb)',el('rt-wt').textContent]);
+  rows.push(['GVW (lb)',el('sv-gvw').textContent]);
+  var csv=rows.map(function(r){ return r.map(function(c){ return '"'+(c||'').replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  dlBlob(new Blob([csv],{type:'text/csv'}),'palletmaster_plan.csv');
+}
+
+function dlBlob(blob,name){
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download=name; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── INIT ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  loadSkuMaster();
+  if(!el('skuBody').querySelectorAll('tr').length) addSkuRow();
+  if(!el('linesBody').querySelectorAll('tr').length) addLine();
+  restoreCollapse();
+  recalc();
+});
+</script>
+</body>
+</html>
