@@ -1156,8 +1156,10 @@ function saveSkuMaster(){
 function loadSkuMaster(){
   var raw; try{ raw=localStorage.getItem(SKU_KEY); }catch(e){}
   var list=[]; if(raw){ try{ list=JSON.parse(raw); }catch(e){} }
+  // fall back to defaults if nothing saved or all models are blank
+  var hasData=list.some(function(r){ return r&&(r.model||'').trim(); });
   el('skuBody').innerHTML='';
-  if(!list.length){
+  if(!hasData){
     SKU_DEFAULTS.forEach(addSkuRow);
     try{ localStorage.setItem(SKU_KEY,JSON.stringify(SKU_DEFAULTS)); }catch(e){}
   } else {
