@@ -7,22 +7,58 @@
 <style>
 /* ── TOKENS ─────────────────────────────────────────────── */
 :root {
-  --bg:       #0b0c10;
-  --surf0:    #13141a;
-  --surf1:    #1a1b24;
-  --surf2:    #21222e;
-  --bdr:      #2a2c3a;
-  --bdr2:     #383b50;
-  --gold:     #f0c040;
-  --golddim:  #c09820;
-  --text:     #dde1ee;
-  --muted:    #7a7f9a;
-  --green:    #3ecf74;
-  --amber:    #f0922a;
-  --red:      #e04848;
-  --blue:     #4a90d9;
-  --r:        5px;
-  --mono:     'Courier New', monospace;
+  --bg:           #0b0c10;
+  --surf0:        #13141a;
+  --surf1:        #1a1b24;
+  --surf2:        #21222e;
+  --bdr:          #2a2c3a;
+  --bdr2:         #383b50;
+  --gold:         #f0c040;
+  --golddim:      #c09820;
+  --text:         #dde1ee;
+  --muted:        #7a7f9a;
+  --green:        #3ecf74;
+  --amber:        #f0922a;
+  --red:          #e04848;
+  --blue:         #4a90d9;
+  --r:            5px;
+  --mono:         'Courier New', monospace;
+  --input-bg:     #090a0f;
+  --row-partial:  #211800;
+  --row-nostack:  #0e1a2a;
+  --row-warn:     #221206;
+  --sc-double-bg: #0d2a1a; --sc-double-bd: #1a4a2a;
+  --sc-triple-bg: #0a1e35; --sc-triple-bd: #1a3a5a;
+  --sc-none-bg:   #1e1006; --sc-none-bd:   #3a2010;
+  --sc-frag-bg:   #1e0808; --sc-frag-bd:   #3a1010;
+  --warn-bg:      #1a0e04; --warn-bd:      #4a2a08;
+  --warn-err-bg:  #160606; --warn-err-bd:  #4a1010;
+}
+[data-theme="light"] {
+  --bg:           #f4f5f7;
+  --surf0:        #ffffff;
+  --surf1:        #eaecf0;
+  --surf2:        #dde0e8;
+  --bdr:          #c8cdd8;
+  --bdr2:         #a8afc0;
+  --gold:         #8a5f00;
+  --golddim:      #b47800;
+  --text:         #1a1c24;
+  --muted:        #5a6070;
+  --green:        #1a8c48;
+  --amber:        #c06010;
+  --red:          #c02020;
+  --blue:         #1a60b0;
+  --input-bg:     #ffffff;
+  --row-partial:  #fff3e0;
+  --row-nostack:  #e3f0fb;
+  --row-warn:     #fff0e0;
+  --sc-double-bg: #d4f7e5; --sc-double-bd: #8ecfaa;
+  --sc-triple-bg: #d0e8fb; --sc-triple-bd: #80b8e8;
+  --sc-none-bg:   #fff0d8; --sc-none-bd:   #d4a840;
+  --sc-frag-bg:   #fde8e8; --sc-frag-bd:   #d09090;
+  --warn-bg:      #fffaf0; --warn-bd:      #d4a840;
+  --warn-err-bg:  #fff5f5; --warn-err-bd:  #d09090;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -30,7 +66,7 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
   background: var(--bg);
   color: var(--text);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.5;
   min-height: 100vh;
 }
@@ -202,15 +238,15 @@ tbody tr:hover td { background: rgba(255,255,255,.025); }
 .c { text-align: center; }
 
 /* row states */
-tr.partial td { background: #211800 !important; }
-tr.nostack td { background: #0e1a2a !important; }
-tr.warn    td { background: #221206 !important; }
+tr.partial td { background: var(--row-partial) !important; }
+tr.nostack td { background: var(--row-nostack) !important; }
+tr.warn    td { background: var(--row-warn)    !important; }
 
 /* ── INPUTS ─────────────────────────────────────────────── */
 input, select {
   font-size: 12px;
   padding: 4px 6px;
-  background: #090a0f;
+  background: var(--input-bg);
   color: var(--text);
   border: 1px solid var(--bdr2);
   border-radius: 3px;
@@ -268,17 +304,23 @@ input::placeholder { color: var(--muted); }
 
 /* ── LINE ITEMS TABLE ───────────────────────────────────── */
 #linesTable th:nth-child(1),
-#linesTable td:nth-child(1) { width: 52px; }   /* reorder */
+#linesTable td:nth-child(1) { width: 52px; }    /* reorder */
 #linesTable th:nth-child(2),
 #linesTable td:nth-child(2) { min-width: 130px; } /* SKU */
 #linesTable th:nth-child(3),
-#linesTable td:nth-child(3) { width: 70px; }   /* qty */
+#linesTable td:nth-child(3) { width: 65px; }    /* qty */
 #linesTable th:nth-child(4),
-#linesTable td:nth-child(4) { width: 80px; }   /* wt ovr */
+#linesTable td:nth-child(4) { width: 75px; }    /* unit wt */
 #linesTable th:nth-child(5),
-#linesTable td:nth-child(5) { width: 80px; }   /* pq ovr */
+#linesTable td:nth-child(5) { width: 85px; }    /* wt ovr */
 #linesTable th:nth-child(6),
-#linesTable td:nth-child(6) { width: 90px; }   /* no-stack ovr */
+#linesTable td:nth-child(6) { width: 60px; }    /* std PQ */
+#linesTable th:nth-child(7),
+#linesTable td:nth-child(7) { width: 75px; }    /* pq ovr */
+#linesTable th:nth-child(8),
+#linesTable td:nth-child(8) { width: 90px; }    /* no-stack ovr */
+#linesTable th:nth-child(9),
+#linesTable td:nth-child(9) { width: 80px; }    /* pallet type */
 
 /* ── RESULTS TABLE ──────────────────────────────────────── */
 .results-section { margin-top: 18px; }
@@ -309,10 +351,10 @@ input::placeholder { color: var(--muted); }
   font-weight: 700;
   letter-spacing: .03em;
 }
-.sc-double { background: #0d2a1a; color: var(--green); border: 1px solid #1a4a2a; }
-.sc-triple { background: #0a1e35; color: var(--blue); border: 1px solid #1a3a5a; }
-.sc-none   { background: #1e1006; color: var(--amber); border: 1px solid #3a2010; }
-.sc-frag   { background: #1e0808; color: var(--red);   border: 1px solid #3a1010; }
+.sc-double { background: var(--sc-double-bg); color: var(--green); border: 1px solid var(--sc-double-bd); }
+.sc-triple { background: var(--sc-triple-bg); color: var(--blue);  border: 1px solid var(--sc-triple-bd); }
+.sc-none   { background: var(--sc-none-bg);   color: var(--amber); border: 1px solid var(--sc-none-bd); }
+.sc-frag   { background: var(--sc-frag-bg);   color: var(--red);   border: 1px solid var(--sc-frag-bd); }
 
 /* ── AXLE CARDS ─────────────────────────────────────────── */
 .axle-row {
@@ -365,15 +407,15 @@ input::placeholder { color: var(--muted); }
 }
 .partial-merge { color: var(--green); font-size: 11px; margin-top: 3px; }
 .warn-card {
-  background: #1a0e04;
-  border: 1px solid #4a2a08;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-bd);
   border-left: 3px solid var(--amber);
   border-radius: var(--r);
   padding: 8px 12px;
   margin-bottom: 6px;
   font-size: 12px;
 }
-.warn-card.err { background: #160606; border-color: #4a1010; border-left-color: var(--red); }
+.warn-card.err { background: var(--warn-err-bg); border-color: var(--warn-err-bd); border-left-color: var(--red); }
 .warn-title { font-weight: 700; color: var(--amber); margin-bottom: 2px; }
 .warn-card.err .warn-title { color: var(--red); }
 
@@ -421,6 +463,7 @@ input::placeholder { color: var(--muted); }
     <div class="ver">Load Calculator · v7</div>
   </div>
   <div class="header-actions">
+    <button class="btn btn-ghost btn-sm" id="themeToggle" onclick="toggleTheme()">☀ Light</button>
     <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Print</button>
     <button class="btn btn-ghost btn-sm" onclick="exportCsv()">↓ CSV</button>
   </div>
@@ -475,9 +518,12 @@ input::placeholder { color: var(--muted); }
             <th class="c no-print"></th>
             <th>SKU / Model</th>
             <th>Qty</th>
+            <th>Unit Wt (lb)</th>
             <th>Wt Override (lb)</th>
+            <th>Std PQ</th>
             <th>PQ Override</th>
             <th>No-Stack Override</th>
+            <th>Pallet Type</th>
             <th class="no-print"></th>
           </tr>
         </thead>
@@ -544,7 +590,7 @@ input::placeholder { color: var(--muted); }
         <div class="axle-card" id="axcard-steer">
           <div class="axle-card-label">Steer Axle</div>
           <div class="axle-card-val" id="axv-steer">— lb</div>
-          <div class="axle-card-limit">Limit: 20,000 lb</div>
+          <div class="axle-card-limit">Limit: 12,000 lb</div>
           <div class="axle-bar"><div class="axle-bar-fill" id="axb-steer"></div></div>
         </div>
         <div class="axle-card" id="axcard-drives">
@@ -587,7 +633,7 @@ input::placeholder { color: var(--muted); }
             <div class="result-row"><span class="result-label">Non-stackable Pallets</span><span class="result-val" id="d-ns">0</span></div>
             <div class="result-row"><span class="result-label">Stackable Pallets</span><span class="result-val" id="d-st">0</span></div>
             <div class="result-row"><span class="result-label">Floor Sp — Non-stack (1:1)</span><span class="result-val" id="d-fns">0</span></div>
-            <div class="result-row"><span class="result-label">Floor Sp — Stackable ⌈N/2⌉</span><span class="result-val" id="d-fst">0</span></div>
+            <div class="result-row"><span class="result-label">Floor Sp — Stackable (stacked)</span><span class="result-val" id="d-fst">0</span></div>
             <div class="result-row"><span class="result-label">Total Floor Spaces</span><span class="result-val" id="d-tfloor">0</span></div>
             <div class="result-row"><span class="result-label">Floor Utilization</span><span class="result-val" id="d-floorutl">—</span></div>
             <div class="result-row"><span class="result-label">Payload Utilization</span><span class="result-val" id="d-payutl">—</span></div>
@@ -666,8 +712,9 @@ input::placeholder { color: var(--muted); }
       Floor spaces are calculated as ⌈carton length ÷ 40"⌉ for non-standard units.
     </p>
     <div class="tbl-wrap">
-      <table id="skuTable">
-        <thead>
+      <div style="max-height:320px;overflow-y:auto;border:1px solid var(--bdr);border-radius:var(--r)">
+      <table id="skuTable" style="margin:0">
+        <thead style="position:sticky;top:0;z-index:2;background:var(--surf2)">
           <tr>
             <th>Model / SKU</th>
             <th>Unit Wt (lb)</th>
@@ -677,7 +724,6 @@ input::placeholder { color: var(--muted); }
             <th>Carton H (in)</th>
             <th>Units/Layer (TI)</th>
             <th>Do Not Stack</th>
-            <th>Own Pallet?</th>
             <th>Pallet Type</th>
             <th>Stack Eligibility</th>
             <th></th>
@@ -685,6 +731,7 @@ input::placeholder { color: var(--muted); }
         </thead>
         <tbody id="skuBody"></tbody>
       </table>
+      </div><!-- /sku-scroll -->
     </div>
   </div>
 </div>
@@ -723,9 +770,12 @@ input::placeholder { color: var(--muted); }
           <tr><th colspan="2">Weights &amp; Geometry</th></tr>
           <tr><td>CHEP Pallet Weight (lb)</td><td><input type="number" id="chepWt" value="58" style="width:70px" oninput="recalc()"></td></tr>
           <tr><td>#1 Pallet Weight (lb)</td><td><input type="number" id="no1Wt" value="43" style="width:70px" oninput="recalc()"></td></tr>
-          <tr><td>Tractor Steer Weight (lb)</td><td><input type="number" id="tractorSteer" value="12000" style="width:80px" oninput="recalc()"></td></tr>
-          <tr><td>Tractor Drive Weight (lb)</td><td><input type="number" id="tractorDrives" value="23000" style="width:80px" oninput="recalc()"></td></tr>
+          <tr><td>Crate Weight (lb)</td><td><input type="number" id="crateWt" value="0" style="width:70px" oninput="recalc()"></td></tr>
+          <tr><td>Tractor Steer Weight (lb)</td><td><input type="number" id="tractorSteer" value="11000" style="width:80px" oninput="recalc()"></td></tr>
+          <tr><td>Tractor Drive Weight (lb)</td><td><input type="number" id="tractorDrives" value="14000" style="width:80px" oninput="recalc()"></td></tr>
+          <tr><td>Trailer Base Weight (lb)</td><td><input type="number" id="trailerBase" value="10000" style="width:80px" oninput="recalc()"></td></tr>
           <tr><td>Kingpin to Rear Trailer Axle (ft)</td><td><input type="number" id="kpToRear" value="41" style="width:60px" oninput="recalc()"></td></tr>
+          <tr><td>Kingpin from Nose (ft)</td><td><input type="number" id="kpFromNose" value="7.5" step="0.5" style="width:60px" oninput="recalc()"></td></tr>
           <tr><th colspan="2">Mode Thresholds</th></tr>
           <tr><td>LTL max floor spaces</td><td><input type="number" id="ltlMaxFloor" value="8" style="width:60px" oninput="recalc()"></td></tr>
           <tr><td>LTL max weight (lb)</td><td><input type="number" id="ltlMaxWt" value="10000" style="width:80px" oninput="recalc()"></td></tr>
@@ -745,6 +795,12 @@ input::placeholder { color: var(--muted); }
 
 // ── STORAGE KEYS ─────────────────────────────────────────
 var SKU_KEY  = 'pm_sku_v7';
+
+function toggleTheme(){
+  var isLight=document.documentElement.getAttribute('data-theme')==='light';
+  document.documentElement.setAttribute('data-theme',isLight?'dark':'light');
+  document.getElementById('themeToggle').textContent=isLight?'☀ Light':'🌙 Dark';
+}
 var COLL_KEY = 'pm_collapse_v7';
 
 // ── HELPERS ───────────────────────────────────────────────
@@ -796,7 +852,7 @@ function applyTrailerPreset(){
 }
 
 // ── SKU MASTER ────────────────────────────────────────────
-function skuDefaults(){ return {model:'',unitWt:'',stdPQ:'',cL:'',cW:'',cH:'',ti:'',doNotStack:'N',ownPallet:'Y',palType:'#1'}; }
+function skuDefaults(){ return {model:'',unitWt:'',stdPQ:'',cL:'',cW:'',cH:'',ti:'',doNotStack:'N',palType:'#1'}; }
 
 function addSkuRow(d){
   var v=d||skuDefaults();
@@ -810,8 +866,7 @@ function addSkuRow(d){
     '<td><input type="number" step="0.1" value="'+esc(v.cH)+'" oninput="onSkuMasterChange(this)" style="width:55px"></td>'+
     '<td><input type="number" step="1" value="'+esc(v.ti)+'" oninput="onSkuMasterChange(this)" style="width:50px"></td>'+
     '<td class="c"><select onchange="onSkuMasterChange(this)" style="width:55px">'+mkOpts(['N','Y'],v.doNotStack)+'</select></td>'+
-    '<td class="c"><select onchange="onSkuMasterChange(this)" style="width:55px">'+mkOpts(['Y','N'],v.ownPallet)+'</select></td>'+
-    '<td><select onchange="onSkuMasterChange(this)" style="width:70px">'+mkOpts(['#1','CHEP','PRODUCT'],v.palType)+'</select></td>'+
+    '<td><select onchange="onSkuMasterChange(this)" style="width:70px">'+mkOpts(['#1','CHEP','Crate','PRODUCT'],v.palType)+'</select></td>'+
     '<td class="stack-elig" style="min-width:140px"><span class="stack-chip sc-none">—</span></td>'+
     '<td class="c"><button class="btn-del btn-sm" onclick="delSkuRow(this)">✕</button></td>';
   el('skuBody').appendChild(tr);
@@ -831,6 +886,7 @@ function updateSkuEligibility(tr){
   var ti=parseFloat(inp[6].value)||0;
   var stdPQ=parseFloat(inp[2].value)||0;
   var doNotStack=inp[7].value;
+  var palType=inp[8]?inp[8].value:'#1';
   var trailerHt=gv('trailerH')||110;
   var palDepth=gv('palDepth')||40;
 
@@ -844,14 +900,15 @@ function updateSkuEligibility(tr){
   if(!cH||!ti||!stdPQ){ eligEl.innerHTML='<span class="stack-chip sc-none">Need dimensions</span>'; return; }
 
   var layers=Math.ceil(stdPQ/ti);
-  var palHt=layers*cH+6; // +6" pallet board
-  var doubleHt=palHt*2;
-  var tripleHt=palHt*3;
+  var palBoard=(palType==='#1'||palType==='CHEP')?6:0;
+  var palHt=layers*cH+palBoard;
+  var maxStack=Math.max(1,Math.floor(trailerHt/palHt));
+  var totalStackHt=Math.round(palHt*maxStack);
 
-  if(tripleHt<=trailerHt){
-    eligEl.innerHTML='<span class="stack-chip sc-triple">Triple OK ('+Math.round(tripleHt)+'")</span>';
-  } else if(doubleHt<=trailerHt){
-    eligEl.innerHTML='<span class="stack-chip sc-double">Double OK ('+Math.round(doubleHt)+'")</span>';
+  if(maxStack>=3){
+    eligEl.innerHTML='<span class="stack-chip sc-triple">'+maxStack+'× OK ('+totalStackHt+'")</span>';
+  } else if(maxStack===2){
+    eligEl.innerHTML='<span class="stack-chip sc-double">Double OK ('+totalStackHt+'")</span>';
   } else {
     eligEl.innerHTML='<span class="stack-chip sc-none">Single only ('+Math.round(palHt)+'" tall)</span>';
   }
@@ -876,7 +933,7 @@ function readSkuMaster(){
       stdPQ:parseFloat(i[2].value)||0, cL:parseFloat(i[3].value)||0,
       cW:parseFloat(i[4].value)||0, cH:parseFloat(i[5].value)||0,
       ti:parseFloat(i[6].value)||0, doNotStack:i[7].value,
-      ownPallet:i[8].value, palType:i[9].value
+      palType:i[8].value
     };
   }).filter(function(r){ return r&&r.model; });
 }
@@ -936,10 +993,13 @@ function addLine(){
       '<button class="btn-del btn-sm" onclick="moveLine(this,1)" title="Down" style="padding:2px 5px">↓</button>'+
     '</td>'+
     '<td><input list="skuDatalist" style="width:130px" class="sku-inp" onchange="applySkuToLine(this)" onblur="applySkuToLine(this)" oninput="recalc()"></td>'+
-    '<td><input type="number" step="1" min="0" style="width:65px" oninput="recalc()"></td>'+
+    '<td><input type="number" step="1" min="0" style="width:60px" oninput="recalc()"></td>'+
+    '<td class="r unit-wt-cell" style="color:var(--muted);font-size:12px">—</td>'+
     '<td><input type="number" step="0.01" style="width:75px" placeholder="from master" oninput="recalc()"></td>'+
-    '<td><input type="number" step="1" style="width:65px" placeholder="from master" oninput="recalc()"></td>'+
+    '<td class="r std-pq-cell" style="color:var(--muted);font-size:12px">—</td>'+
+    '<td><input type="number" step="1" style="width:60px" placeholder="from master" oninput="recalc()"></td>'+
     '<td class="c"><select style="width:80px" onchange="recalc()"><option value="">Master</option><option value="N">Allow Stack</option><option value="Y">No Stack</option></select></td>'+
+    '<td class="c"><select class="pal-type-sel" style="width:70px" onchange="recalc()"><option value="">Master</option><option value="#1">#1</option><option value="CHEP">CHEP</option><option value="Crate">Crate</option><option value="PRODUCT">Product</option></select></td>'+
     '<td class="c no-print"><button class="btn-del" onclick="deleteLine(this)">✕</button></td>';
   el('linesBody').appendChild(tr);
 }
@@ -972,13 +1032,13 @@ function applySkuToLine(inp){
   var code=(inp.value||'').trim();
   if(!code) return;
   var sku=readSkuMaster().find(function(s){ return s.model===code; });
-  if(!sku) return;
   var tr=inp.closest('tr');
-  var allInp=tr.querySelectorAll('input');
-  // allInp: [0]=sku, [1]=qty, [2]=wtOverride, [3]=pqOverride
-  // Only set if currently blank (don't overwrite user edits)
-  if(!allInp[2].value) allInp[2].value='';  // leave wt override blank — shown as placeholder
-  if(!allInp[3].value) allInp[3].value='';
+  // show unit weight from master
+  var uwCell=tr.querySelector('.unit-wt-cell');
+  if(uwCell) uwCell.textContent=sku?(sku.unitWt?sku.unitWt+' lb':'—'):'—';
+  var pqCell=tr.querySelector('.std-pq-cell');
+  if(pqCell) pqCell.textContent=sku?(sku.stdPQ||'—'):'—';
+  if(!sku) return;
   tr.dataset.skuModel=sku.model;
   recalc();
 }
@@ -988,15 +1048,17 @@ function recalc(){
   var skuMaster=readSkuMaster();
   function findSku(code){ return skuMaster.find(function(s){ return s.model===code; })||null; }
 
-  var chepWt=gv('chepWt'); var no1Wt=gv('no1Wt');
+  var chepWt=gv('chepWt'); var no1Wt=gv('no1Wt'); var crateWt=gv('crateWt')||0;
   var maxPayload=gv('maxPayload'); var maxFloor=gv('maxFloor');
   var trailerHt=gv('trailerH')||110; var palDepth=gv('palDepth')||40;
-  var trailerLen=gv('trailerLen')||53;
+  var trailerLen=gv('trailerLen')||53; var trailerW=gv('trailerW')||100;
   var tractorSteer=gv('tractorSteer')||12000; var tractorDrives=gv('tractorDrives')||23000;
 
   var sumProdWt=0,sumPalWt=0,sumTotalWt=0;
   var totalUnits=0,totalPallets=0,totalFloor=0,totalCubeIn=0;
-  var nsP=0,stP=0; // non-stack, stackable pallet counts
+  var nsP=0,stP=0;           // pallet counts (for display)
+  var nsFloor=0,stFloor=0;  // raw floor spaces before stacking
+  var hasCrateOrProduct=false;
   var allPallets=[],partials=[],htWarns=[];
   var resultsRows=[];
 
@@ -1013,15 +1075,22 @@ function recalc(){
     var wtOvr=inp[2].value.trim()!==''?parseFloat(inp[2].value):null;
     var pqOvr=inp[3].value.trim()!==''?parseFloat(inp[3].value):null;
     var nsOvr=sel[0]?sel[0].value:''; // ''=master, 'Y'=force no stack, 'N'=allow
+    var palTypeOvr=sel[1]?sel[1].value:''; // ''=master
 
     var sku=findSku(skuCode);
+
+    // update display cells
+    var uwCell=tr.querySelector('.unit-wt-cell');
+    if(uwCell) uwCell.textContent=sku?(sku.unitWt?sku.unitWt+' lb':'—'):'—';
+    var pqCell=tr.querySelector('.std-pq-cell');
+    if(pqCell) pqCell.textContent=sku?(sku.stdPQ||'—'):'—';
 
     var unitWt  = wtOvr!==null ? wtOvr  : (sku?sku.unitWt:0);
     var effPQ   = pqOvr!==null ? pqOvr  : (sku?sku.stdPQ:0);
     var cL      = sku?sku.cL:0; var cW=sku?sku.cW:0; var cH=sku?sku.cH:0;
     var ti      = sku?sku.ti:0;
-    var ownPallet = sku?sku.ownPallet:'Y';
-    var palType   = sku?sku.palType:'#1';
+    var palType   = palTypeOvr!==''?palTypeOvr:(sku?sku.palType:'#1');
+    if(palType==='Crate'||palType==='PRODUCT') hasCrateOrProduct=true;
     var doNotStackMaster = sku?sku.doNotStack:'N';
 
     // resolve no-stack: line override wins if set
@@ -1036,63 +1105,69 @@ function recalc(){
     var palCt=full+(isPartial?1:0);
     totalPallets+=palCt;
 
-    // pallet weight
-    var palWtPer=(palType==='CHEP'?chepWt:(palType==="#1"?no1Wt:0));
-    var palWtLine=(ownPallet==='Y'&&palType!=='PRODUCT')?palCt*palWtPer:0;
+    // pallet weight driven by palType
+    var palWtPer=(palType==='CHEP'?chepWt:(palType==="#1"?no1Wt:(palType==='Crate'?crateWt:0)));
+    var palWtLine=(palType!=='PRODUCT')?palCt*palWtPer:0;
     var prodWt=qty*unitWt;
     var lineWt=prodWt+palWtLine;
     sumProdWt+=prodWt; sumPalWt+=palWtLine; sumTotalWt+=lineWt;
 
-    // floor spaces — from dimensions, fallback to 1
+    // floor spaces — crates use their own footprint; pallets use pallet grid
+    var isCrate=palType==='Crate';
     var unitLen=cL>0?cL:48;
-    var floorPerPallet=Math.max(1,Math.ceil(unitLen/palDepth));
+    var floorPerPallet=isCrate?1:Math.max(1,Math.ceil(unitLen/palDepth));
+    // crate row dimensions: short side along truck (cW), long side across (cL)
+    var rowDepthIn=isCrate?(cW||palDepth):palDepth;
+    var rowCapacity=isCrate?Math.max(1,Math.floor(trailerW/(cL||48))):2;
 
     // pallet height from dimensions
     var palHt=0;
     if(cH>0&&ti>0&&effPQ>0){
       var layers=Math.ceil(effPQ/ti);
-      palHt=layers*cH+6;
+      var palBoard=(palType==='#1'||palType==='CHEP')?6:0;
+      palHt=layers*cH+palBoard;
     }
 
-    // stackability from dimensions + flags
-    var canDouble=!doNotStack==='Y'; // initial
-    var canTriple=false;
+    // stackability — maximize cube: stack as high as trailer allows
+    var maxStack=1;
     var stackChip='';
     var stackLabel='';
 
     if(doNotStack==='Y'){
-      canDouble=false; canTriple=false;
+      maxStack=1;
       stackChip='<span class="stack-chip sc-frag">Do Not Stack</span>';
       stackLabel='Do NOT stack — fragile/restricted';
     } else if(palHt>0){
-      var dHt=palHt*2; var tHt=palHt*3;
-      if(tHt<=trailerHt){
-        canDouble=true; canTriple=true;
-        stackChip='<span class="stack-chip sc-triple">Triple OK ('+Math.round(tHt)+'")</span>';
-        stackLabel='Triple-stack OK (3 high, stacked = '+Math.round(tHt)+'")';
-      } else if(dHt<=trailerHt){
-        canDouble=true; canTriple=false;
-        stackChip='<span class="stack-chip sc-double">Double OK ('+Math.round(dHt)+'")</span>';
-        stackLabel='Double-stack OK (2 high, stacked = '+Math.round(dHt)+'")';
+      maxStack=Math.max(1,Math.floor(trailerHt/palHt));
+      var totalStackHt=Math.round(palHt*maxStack);
+      if(maxStack>=3){
+        stackChip='<span class="stack-chip sc-triple">'+maxStack+'× OK ('+totalStackHt+'")</span>';
+        stackLabel=maxStack+'× stack OK ('+maxStack+' high = '+totalStackHt+'")';
+      } else if(maxStack===2){
+        stackChip='<span class="stack-chip sc-double">Double OK ('+totalStackHt+'")</span>';
+        stackLabel='Double-stack OK (2 high = '+totalStackHt+'")';
       } else {
-        canDouble=false; canTriple=false;
         stackChip='<span class="stack-chip sc-none">Single only ('+Math.round(palHt)+'" tall)</span>';
-        stackLabel='Single layer only — too tall to stack (pallet '+Math.round(palHt)+'")';
+        stackLabel='Single layer only — too tall to stack ('+Math.round(palHt)+'")';
         if(palHt*2>trailerHt){ htWarns.push({sku:skuCode,palHt:palHt,dHt:Math.round(palHt*2),limit:trailerHt}); }
       }
     } else {
-      // no dims: fall back to no stack
-      canDouble=false; canTriple=false;
       stackChip='<span class="stack-chip sc-none">No dims</span>';
       stackLabel='No stacking data — add carton dimensions to SKU master';
     }
 
     // floor space accounting
-    var ownFS=(ownPallet==='Y')?palCt:0;
-    if(ownFS>0){
-      if(canTriple){ stP+=ownFS; }
-      else if(canDouble){ stP+=ownFS; }
-      else { nsP+=ownFS; }
+    var ownFS=(palType!=='PRODUCT')?palCt*floorPerPallet:0;
+    if(palType!=='PRODUCT'){
+      if(isCrate){
+        var numCrateRows=Math.floor(trailerLen*12/rowDepthIn);
+        var crateFloorUsed=(palCt>=numCrateRows)?numCrateRows:palCt;
+        if(maxStack>1){ stP+=palCt; stFloor+=crateFloorUsed; }
+        else { nsP+=palCt; nsFloor+=crateFloorUsed; }
+      } else {
+        if(maxStack>1){ stP+=palCt; stFloor+=Math.ceil(ownFS/maxStack); }
+        else { nsP+=palCt; nsFloor+=ownFS; }
+      }
     }
 
     var lineCubeFt=0;
@@ -1102,9 +1177,9 @@ function recalc(){
       lineCubeFt=cubeIn3/1728;
     }
 
-    if(isPartial&&ownPallet==='Y'){
+    if(isPartial&&palType!=='PRODUCT'){
       tr.classList.add('partial');
-      partials.push({sku:skuCode,left:left,effPQ:effPQ,palType:palType,canDouble:canDouble,canTriple:canTriple});
+      partials.push({sku:skuCode,left:left,effPQ:effPQ,palType:palType,maxStack:maxStack});
     }
     if(doNotStack==='Y') tr.classList.add('nostack');
 
@@ -1114,28 +1189,76 @@ function recalc(){
       '<td>'+esc(skuCode||'—')+'</td>'+
       '<td class="r">'+fmtI(qty)+'</td>'+
       '<td class="r">'+palCt+'</td>'+
-      '<td class="r">'+(ownPallet==='Y'?palCt*floorPerPallet:0)+'</td>'+
+      '<td class="r">'+(palType!=='PRODUCT'?(isCrate?(palCt>=numCrateRows?numCrateRows:palCt):palCt*floorPerPallet):0)+'</td>'+
       '<td>'+stackChip+'</td>'+
       '<td class="r">'+(palHt>0?Math.round(palHt)+'":':'—')+'</td>'+
       '<td class="r">'+fmt(lineWt)+'</td>'+
       '<td class="r">'+lineCubeFt.toFixed(1)+'</td>';
     el('resultsBody').appendChild(rtr);
 
-    // build pallet objects for axle calc
-    if(ownPallet==='Y'){
-      for(var i=0;i<palCt;i++){
-        var isFull=i<full;
-        var unitsOn=isFull?effPQ:(left||effPQ);
-        var pw=unitsOn*unitWt+palWtPer;
-        allPallets.push({sku:skuCode,weight:pw,canDouble:canDouble,canTriple:canTriple,
-                         isPartial:!isFull,floorSpaces:floorPerPallet,palHt:palHt,stackLabel:stackLabel});
+    // build load-plan objects for axle calc
+    if(palType!=='PRODUCT'){
+      if(isCrate){
+        // fill trailer length first, distribute units evenly across rows,
+        // taller stacks placed in the middle for load balance
+        if(palCt>=numCrateRows){
+          var baseStack=Math.floor(palCt/numCrateRows);
+          var extraRows=palCt%numCrateRows;
+          var midRow=Math.floor(numCrateRows/2);
+          var extraStart=midRow;
+          for(var ri=0;ri<numCrateRows;ri++){
+            var stackHere=baseStack+(ri>=extraStart&&ri<extraStart+extraRows?1:0);
+            if(stackHere===0) continue;
+            var pw=stackHere*(unitWt+palWtPer);
+            allPallets.push({sku:skuCode,weight:pw,maxStack:maxStack,
+                             isPartial:(stackHere<maxStack),floorSpaces:1,
+                             rowDepthIn:rowDepthIn,rowCapacity:rowCapacity,
+                             palHt:palHt,stackLabel:stackLabel});
+          }
+        } else {
+          // fewer crates than rows: one per row, fill from nose
+          for(var ri=0;ri<palCt;ri++){
+            var pw=unitWt+palWtPer;
+            allPallets.push({sku:skuCode,weight:pw,maxStack:1,
+                             isPartial:false,floorSpaces:1,
+                             rowDepthIn:rowDepthIn,rowCapacity:rowCapacity,
+                             palHt:palHt,stackLabel:stackLabel});
+          }
+        }
+      } else {
+        // Fill-trailer-first at row level: spread floor positions across all rows,
+        // extras (heavier rows) starting at midrow going rearward
+        var numPalRows=Math.floor(trailerLen*12/rowDepthIn);
+        var totalFPs=Math.ceil(palCt/maxStack);
+        var palBaseFP=Math.floor(totalFPs/numPalRows);
+        var palExtraRows=totalFPs%numPalRows;
+        var palMid=Math.floor(numPalRows/2);
+        var palExtStart=Math.max(0,Math.min(palMid,numPalRows-palExtraRows));
+        var palletsAssigned=0;
+        for(var ri2=0;ri2<numPalRows;ri2++){
+          var fpsInRow=Math.min(palBaseFP+(ri2>=palExtStart&&ri2<palExtStart+palExtraRows?1:0),rowCapacity);
+          if(fpsInRow<=0) continue;
+          var palletsInRow=Math.min(fpsInRow*maxStack,palCt-palletsAssigned);
+          if(palletsInRow<=0) continue;
+          var pw=0;
+          for(var ppi=palletsAssigned;ppi<palletsAssigned+palletsInRow;ppi++){
+            var isFull2=ppi<full;
+            var unitsOn2=isFull2?effPQ:(left||effPQ);
+            pw+=unitsOn2*unitWt+palWtPer;
+          }
+          palletsAssigned+=palletsInRow;
+          allPallets.push({sku:skuCode,weight:pw,maxStack:1,
+                           isPartial:(palletsAssigned<palCt),floorSpaces:rowCapacity,
+                           rowDepthIn:rowDepthIn,rowCapacity:rowCapacity,
+                           palHt:palHt,stackLabel:stackLabel});
+        }
       }
     }
   });
 
   // floor space totals
-  var nsFS=nsP;
-  var stFS=Math.ceil(stP/2); // conservative: assume double, not triple, for floor space
+  var nsFS=nsFloor;
+  var stFS=stFloor; // already divided by maxStack per line
   var totalFS=nsFS+stFS;
 
   // summary
@@ -1178,7 +1301,11 @@ function recalc(){
 
   // mode
   var mode=computeMode(sumTotalWt,totalFS);
-  renderStatus(sumTotalWt,totalFS,totalCubeFt,maxPayload,maxFloor,mode,axleResult);
+  // when standard pallets exceed floor capacity they must be stacked → repositionable → higher cap
+  var overweightCap=(!hasCrateOrProduct&&totalPallets>maxFloor)?42600:41500;
+  // flag for future loading diagram: evenly distribute when at max weight
+  var evenDistribute=(sumTotalWt>=overweightCap*0.99);
+  renderStatus(sumTotalWt,totalFS,totalCubeFt,maxPayload,maxFloor,mode,axleResult,plan.linearFeet,overweightCap);
 
   // partials
   renderPartials(partials);
@@ -1192,35 +1319,44 @@ function recalc(){
 // ── LOAD PLAN ─────────────────────────────────────────────
 function buildLoadPlan(pallets,maxFloor){
   var palDepth=gv('palDepth')||40;
-  var numRows=Math.ceil((maxFloor||30)/2);
+  var trailerLen=gv('trailerLen')||53;
+  if(!pallets.length) return {rows:[],rowsUsed:0,linearFeet:0,rowDepthFt:palDepth/12};
+
+  // use first pallet's row dimensions (crate-aware)
+  var rowDepthIn=pallets[0].rowDepthIn||palDepth;
+  var rowCap=pallets[0].rowCapacity||2;
+  var numRows=Math.floor((trailerLen*12)/rowDepthIn);
+
   var rows=[];
   for(var i=0;i<numRows;i++) rows.push({pallets:[],weight:0,floorUsed:0});
-  if(!pallets.length) return {rows:rows,rowsUsed:0,linearFeet:0};
 
-  var ri=0,rowFloor=0,rowCap=2;
-  pallets.forEach(function(p){
+  var ri=0,rowFloor=0;
+  for(var pi=0;pi<pallets.length;pi++){
+    var p=pallets[pi];
     var fs=p.floorSpaces||1;
     if(rowFloor+fs<=rowCap){
       rows[ri].pallets.push(p); rows[ri].weight+=p.weight; rows[ri].floorUsed+=fs; rowFloor+=fs;
     } else {
-      ri++; if(ri>=numRows) ri=numRows-1;
+      ri++;
+      if(ri>=numRows) break;
       rowFloor=0;
       rows[ri].pallets.push(p); rows[ri].weight+=p.weight; rows[ri].floorUsed+=fs; rowFloor+=fs;
     }
-  });
+  }
 
   var lastUsed=0;
   rows.forEach(function(r,i){ if(r.pallets.length) lastUsed=i; });
   var rowsUsed=lastUsed+1;
-  return {rows:rows,rowsUsed:rowsUsed,linearFeet:rowsUsed*(palDepth/12)};
+  return {rows:rows,rowsUsed:rowsUsed,linearFeet:rowsUsed*(rowDepthIn/12),rowDepthFt:rowDepthIn/12};
 }
 
 // ── AXLE CALC (Geometry / Bridge Formula B) ───────────────
 function calcAxles(plan,cargoWt,tractorSteer,tractorDrives){
   var kpToRear=gv('kpToRear')||41;
   var trailerLen=gv('trailerLen')||53;
-  var palDepthFt=(gv('palDepth')||40)/12;
-  var kpFromNose=trailerLen-kpToRear-2;
+  var palDepthFt=plan.rowDepthFt||((gv('palDepth')||40)/12);
+  var trailerBase=gv('trailerBase')||10000;
+  var kpFromNose=gv('kpFromNose')||7.5;
 
   var cargoDrives=0,cargoTrailer=0;
   plan.rows.forEach(function(row,i){
@@ -1232,9 +1368,12 @@ function calcAxles(plan,cargoWt,tractorSteer,tractorDrives){
     cargoDrives+=row.weight*(1-trailerFrac);
   });
 
-  var steer=tractorSteer;
-  var drives=tractorDrives+cargoDrives;
-  var trailer=cargoTrailer;
+  // Fifth wheel sits ~2ft ahead of drives center, ~18ft behind steer.
+  // Steer picks up ~10% of the kingpin (cargoDrives) load via tractor frame.
+  var fifthWheelLoad=cargoDrives;
+  var steer=tractorSteer+Math.round(fifthWheelLoad*0.04);
+  var drives=tractorDrives+Math.round(fifthWheelLoad*0.96);
+  var trailer=trailerBase+cargoTrailer;
   var gvw=steer+drives+trailer;
 
   // Bridge Formula B: W ≤ 500*(LN/(N-1)+12N+36)
@@ -1249,7 +1388,7 @@ function renderAxles(ax,tractorSteer,tractorDrives){
   setText('ax-steerbase',fmtI(tractorSteer));
   setText('ax-drivesbase',fmtI(tractorDrives));
 
-  var limits={steer:20000,drives:34000,trailer:34000,gvw:80000};
+  var limits={steer:12000,drives:34000,trailer:34000,gvw:80000};
   var vals={steer:ax.steer,drives:ax.drives,trailer:ax.trailer,gvw:ax.gvw};
   var warns=[];
 
@@ -1289,7 +1428,9 @@ function computeMode(wt,fs){
   return 'Truckload';
 }
 
-function renderStatus(wt,fs,cube,maxPayload,maxFloor,mode,ax){
+function renderStatus(wt,fs,cube,maxPayload,maxFloor,mode,ax,linearFeet,overweightCap){
+  overweightCap=overweightCap||42600;
+  var overweight=wt>overweightCap;
   var gwPct=ax.gvw/80000*100;
   var fsPct=maxFloor?(fs/maxFloor*100):0;
   var payPct=maxPayload?(wt/maxPayload*100):0;
@@ -1302,9 +1443,24 @@ function renderStatus(wt,fs,cube,maxPayload,maxFloor,mode,ax){
     if(card){ card.className='stat-card '+(pct>100?'err':pct>90?'warn':'ok'); }
   }
 
+  if(overweight){
+    var pc=el('card-payload'); if(pc) pc.className='stat-card err';
+    setText('sv-payload','OVERWEIGHT');
+    setText('ss-payload',fmtI(wt)+' lb — exceeds '+fmtI(overweightCap)+' lb cap');
+    var bar=el('sb-payload'); if(bar){ bar.style.width='100%'; bar.style.background='var(--red)'; }
+    var aw=el('axleWarnings');
+    if(aw){ var d=document.createElement('div'); d.className='warn-card err';
+      d.innerHTML='<div class="warn-title">⚠ OVERWEIGHT — Shipment Exceeds '+fmtI(overweightCap)+' lb Cap</div>'+
+        'Total shipment weight of '+fmtI(wt)+' lb exceeds the '+fmtI(overweightCap)+' lb maximum. Axle estimates may not be reliable — reduce load before dispatching.';
+      aw.insertBefore(d,aw.firstChild); }
+  } else {
+    setCard('card-payload','sv-payload','ss-payload','sb-payload',payPct,fmtI(wt)+' lb',maxPayload?payPct.toFixed(1)+'% of '+fmtI(maxPayload)+' lb':'');
+  }
+
   setCard('card-gvw','sv-gvw','ss-gvw','sb-gvw',gwPct,fmtI(ax.gvw)+' lb',gwPct.toFixed(1)+'% of 80,000 lb');
-  setCard('card-floor','sv-floor','ss-floor','sb-floor',fsPct,fs+' / '+(maxFloor||'—'),maxFloor?fsPct.toFixed(1)+'% utilized':'');
-  setCard('card-payload','sv-payload','ss-payload','sb-payload',payPct,fmtI(wt)+' lb',maxPayload?payPct.toFixed(1)+'% of '+fmtI(maxPayload)+' lb':'');
+  var linFtStr=linearFeet?(linearFeet.toFixed(1)+' ft used'):'';
+  var floorSub=(maxFloor?fsPct.toFixed(1)+'% utilized':'')+(linFtStr?' · '+linFtStr:'');
+  setCard('card-floor','sv-floor','ss-floor','sb-floor',fsPct,fs+' / '+(maxFloor||'—'),floorSub);
 
   var modeEl=el('sv-mode'); var pill=el('mode-badge');
   if(modeEl) modeEl.textContent=mode;
@@ -1321,7 +1477,7 @@ function renderPartials(partials){
   partials.forEach(function(p,i){
     var d=document.createElement('div'); d.className='partial-card';
     d.innerHTML='<strong>'+esc(p.sku)+'</strong>: '+p.left+' / '+p.effPQ+' units on last pallet ('+p.palType+')';
-    var cands=partials.filter(function(q,j){ return j!==i&&q.canDouble===p.canDouble&&q.canTriple===p.canTriple&&q.palType===p.palType; });
+    var cands=partials.filter(function(q,j){ return j!==i&&q.maxStack===p.maxStack&&q.palType===p.palType; });
     if(cands.length){
       d.innerHTML+='<div class="partial-merge">↳ Possible consolidation with: '+cands.map(function(c){ return '<strong>'+esc(c.sku)+'</strong> ('+c.left+' units)'; }).join(', ')+'</div>';
     }
