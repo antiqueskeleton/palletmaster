@@ -149,8 +149,8 @@ body {
   color: var(--text);
   transition: color .3s;
 }
+.stat-card.ok  .stat-value { color: var(--green); }
 .stat-card.err .stat-value { color: var(--red); }
-.stat-card.warn .stat-value { color: var(--amber); }
 .stat-sub {
   font-size: 11px;
   color: var(--muted);
@@ -1614,8 +1614,8 @@ function renderAxles(ax,tractorSteer,tractorDrives){
     setText('axv-'+k,fmtI(v)+' lb');
     var bar=el('axb-'+k);
     var card=el('axcard-'+k);
-    if(bar){ bar.style.width=Math.min(pct,110).toFixed(1)+'%'; bar.style.background=pct>100?'var(--red)':pct>90?'var(--amber)':'var(--green)'; }
-    if(card){ card.style.borderColor=pct>100?'var(--red)':pct>90?'#5a3a00':'var(--bdr)'; }
+    if(bar){ bar.style.width=Math.min(pct,110).toFixed(1)+'%'; bar.style.background=pct>100?'var(--red)':'var(--green)'; }
+    if(card){ card.style.borderColor=pct>100?'var(--red)':'var(--bdr)'; }
     if(v>lim) warns.push({name:k,v:v,lim:lim,over:Math.round(v-lim)});
   });
 
@@ -1654,9 +1654,9 @@ function renderStatus(wt,fs,cube,maxPayload,maxFloor,mode,ax,linearFeet,overweig
   function setCard(cid,vid,sub,sbid,pct,val,subTxt){
     setText(vid,val);
     setText(sub,subTxt);
-    var bar=el(sbid); if(bar){ bar.style.width=Math.min(pct,100).toFixed(1)+'%'; bar.style.background=pct>100?'var(--red)':pct>90?'var(--amber)':'var(--green)'; }
+    var bar=el(sbid); if(bar){ bar.style.width=Math.min(pct,100).toFixed(1)+'%'; bar.style.background=pct>100?'var(--red)':'var(--green)'; }
     var card=el(cid);
-    if(card){ card.className='stat-card '+(pct>100?'err':pct>90?'warn':'ok'); }
+    if(card){ card.className='stat-card '+(pct>100?'err':'ok'); }
   }
 
   if(overweight){
