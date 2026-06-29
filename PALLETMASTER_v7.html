@@ -475,26 +475,26 @@ input::placeholder { color: var(--muted); }
 <div class="status-strip no-print">
   <div class="stat-card" id="card-gvw">
     <div class="stat-label">Gross Vehicle Weight</div>
-    <div class="stat-value" id="sv-gvw">— lb</div>
+    <div class="stat-value" id="sv-gvw">— %</div>
     <div class="stat-sub" id="ss-gvw">of 80,000 lb federal max</div>
     <div class="stat-bar"><div class="stat-bar-fill" id="sb-gvw"></div></div>
   </div>
   <div class="stat-card" id="card-floor">
-    <div class="stat-label">Floor Spaces</div>
-    <div class="stat-value" id="sv-floor">— / —</div>
+    <div class="stat-label">Linear Feet</div>
+    <div class="stat-value" id="sv-floor">— ft</div>
     <div class="stat-sub" id="ss-floor">trailer floor utilization</div>
     <div class="stat-bar"><div class="stat-bar-fill" id="sb-floor"></div></div>
   </div>
   <div class="stat-card" id="card-payload">
-    <div class="stat-label">Payload Used</div>
+    <div class="stat-label">Shipment Weight</div>
     <div class="stat-value" id="sv-payload">— lb</div>
     <div class="stat-sub" id="ss-payload">of payload capacity</div>
     <div class="stat-bar"><div class="stat-bar-fill" id="sb-payload"></div></div>
   </div>
   <div class="stat-card" id="card-mode">
     <div class="stat-label">Ship Mode</div>
-    <div class="stat-value" id="sv-mode" style="font-size:16px">—</div>
-    <div class="mode-badge" id="mode-badge">—</div>
+    <div class="mode-badge" id="mode-badge" style="margin:6px 0 4px">—</div>
+    <div class="stat-sub" id="sv-mode" style="margin-top:2px">—</div>
   </div>
 </div>
 
@@ -775,7 +775,7 @@ input::placeholder { color: var(--muted); }
           <tr><td>Tractor Drive Weight (lb)</td><td><input type="number" id="tractorDrives" value="14000" style="width:80px" oninput="recalc()"></td></tr>
           <tr><td>Trailer Base Weight (lb)</td><td><input type="number" id="trailerBase" value="10000" style="width:80px" oninput="recalc()"></td></tr>
           <tr><td>Kingpin to Rear Trailer Axle (ft)</td><td><input type="number" id="kpToRear" value="41" style="width:60px" oninput="recalc()"></td></tr>
-          <tr><td>Kingpin from Nose (ft)</td><td><input type="number" id="kpFromNose" value="7.5" step="0.5" style="width:60px" oninput="recalc()"></td></tr>
+          <tr><td>Kingpin from Nose (ft)</td><td><input type="number" id="kpFromNose" value="5.0" step="0.5" style="width:60px" oninput="recalc()"></td></tr>
           <tr><th colspan="2">Mode Thresholds</th></tr>
           <tr><td>LTL max floor spaces</td><td><input type="number" id="ltlMaxFloor" value="8" style="width:60px" oninput="recalc()"></td></tr>
           <tr><td>LTL max weight (lb)</td><td><input type="number" id="ltlMaxWt" value="10000" style="width:80px" oninput="recalc()"></td></tr>
@@ -940,7 +940,7 @@ var SKU_DEFAULTS = [
   {"model":"P09301","unitWt":237,"stdPQ":4,"cL":33.3,"cW":22.9,"cH":24.4,"ti":2,"doNotStack":"N","palType":"#1"},
   {"model":"P09305","unitWt":237,"stdPQ":4,"cL":33.3,"cW":22.9,"cH":24.4,"ti":2,"doNotStack":"N","palType":"#1"},
   {"model":"P12001","unitWt":423.3,"stdPQ":1,"cL":42.3,"cW":26,"cH":34.4,"ti":1,"doNotStack":"N","palType":"PRODUCT"},
-  {"model":"P12002","unitWt":432,"stdPQ":1,"cL":43,"cW":26,"cH":35,"ti":1,"doNotStack":"N","palType":"PRODUCT"},
+  {"model":"P12002","unitWt":432,"stdPQ":1,"cL":43,"cW":26,"cH":35,"ti":1,"doNotStack":"N","palType":"Crate"},
   {"model":"T04072","unitWt":126,"stdPQ":12,"cL":23.8,"cW":18.8,"cH":20.2,"ti":3,"doNotStack":"Y","palType":"#1"},
   {"model":"T04073","unitWt":140.3,"stdPQ":12,"cL":27.5,"cW":18.9,"cH":20.5,"ti":3,"doNotStack":"Y","palType":"#1"},
   {"model":"T06373","unitWt":164,"stdPQ":4,"cL":29.3,"cW":21.8,"cH":22,"ti":2,"doNotStack":"N","palType":"CHEP"},
@@ -1427,7 +1427,7 @@ function recalc(){
             if(stackHere===0) continue;
             var pw=stackHere*(unitWt+palWtPer);
             allPallets.push({sku:skuCode,weight:pw,maxStack:maxStack,
-                             isPartial:(stackHere<maxStack),floorSpaces:1,
+                             isPartial:(stackHere<maxStack),floorSpaces:rowCapacity,
                              rowDepthIn:rowDepthIn,rowCapacity:rowCapacity,
                              palHt:palHt,stackLabel:stackLabel});
           }
@@ -1436,7 +1436,7 @@ function recalc(){
           for(var ri=0;ri<palCt;ri++){
             var pw=unitWt+palWtPer;
             allPallets.push({sku:skuCode,weight:pw,maxStack:1,
-                             isPartial:false,floorSpaces:1,
+                             isPartial:false,floorSpaces:rowCapacity,
                              rowDepthIn:rowDepthIn,rowCapacity:rowCapacity,
                              palHt:palHt,stackLabel:stackLabel});
           }
@@ -1518,7 +1518,7 @@ function recalc(){
   // mode
   var mode=computeMode(sumTotalWt,totalFS);
   // when standard pallets exceed floor capacity they must be stacked → repositionable → higher cap
-  var overweightCap=(!hasCrateOrProduct&&totalPallets>maxFloor)?42600:41500;
+  var overweightCap=(!hasCrateOrProduct&&totalPallets>maxFloor)?43600:42000;
   // flag for future loading diagram: evenly distribute when at max weight
   var evenDistribute=(sumTotalWt>=overweightCap*0.99);
   renderStatus(sumTotalWt,totalFS,totalCubeFt,maxPayload,maxFloor,mode,axleResult,plan.linearFeet,overweightCap);
@@ -1645,7 +1645,7 @@ function computeMode(wt,fs){
 }
 
 function renderStatus(wt,fs,cube,maxPayload,maxFloor,mode,ax,linearFeet,overweightCap){
-  overweightCap=overweightCap||42600;
+  overweightCap=overweightCap||43600;
   var overweight=wt>overweightCap;
   var gwPct=ax.gvw/80000*100;
   var fsPct=maxFloor?(fs/maxFloor*100):0;
@@ -1673,15 +1673,15 @@ function renderStatus(wt,fs,cube,maxPayload,maxFloor,mode,ax,linearFeet,overweig
     setCard('card-payload','sv-payload','ss-payload','sb-payload',payPct,fmtI(wt)+' lb',maxPayload?payPct.toFixed(1)+'% of '+fmtI(maxPayload)+' lb':'');
   }
 
-  setCard('card-gvw','sv-gvw','ss-gvw','sb-gvw',gwPct,fmtI(ax.gvw)+' lb',gwPct.toFixed(1)+'% of 80,000 lb');
-  var linFtStr=linearFeet?(linearFeet.toFixed(1)+' ft used'):'';
-  var floorSub=(maxFloor?fsPct.toFixed(1)+'% utilized':'')+(linFtStr?' · '+linFtStr:'');
-  setCard('card-floor','sv-floor','ss-floor','sb-floor',fsPct,fs+' / '+(maxFloor||'—'),floorSub);
+  setCard('card-gvw','sv-gvw','ss-gvw','sb-gvw',gwPct,gwPct.toFixed(1)+'%',fmtI(ax.gvw)+' of 80,000 lb');
+  var linFtStr=linearFeet?linearFeet.toFixed(1)+' ft':'—';
+  var floorSub=fs+' floor spaces'+(maxFloor?' · '+fsPct.toFixed(1)+'%':'');
+  setCard('card-floor','sv-floor','ss-floor','sb-floor',fsPct,linFtStr,floorSub);
 
   var modeEl=el('sv-mode'); var pill=el('mode-badge');
-  if(modeEl) modeEl.textContent=mode;
   var mc=mode==='—'?'var(--muted)':mode==='Truckload'||mode==='LTL'?'var(--green)':mode==='Partial TL'?'var(--amber)':'var(--muted)';
   if(pill){ pill.textContent=mode; pill.style.borderColor=mc; pill.style.color=mc; }
+  if(modeEl){ modeEl.textContent=wt>0?(fmtI(wt)+' lb · '+fs+' fps'):'—'; }
   var mcard=el('card-mode');
   if(mcard){ mcard.className='stat-card '+(payPct>100||fsPct>100?'err':'ok'); }
 }
